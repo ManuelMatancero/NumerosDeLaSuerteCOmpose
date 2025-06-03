@@ -655,14 +655,14 @@ fun DreamListItemRedesigned(
                     Box(
                         modifier = Modifier
                             .size(4.dp)
-                            .background(GoldAccent.copy(alpha = 0.3f))
+                            .background(GoldAccent.copy(alpha = 0.3f), CircleShape)
                             .align(Alignment.TopStart)
                             .offset(x = 6.dp, y = 6.dp)
                     )
                     Box(
                         modifier = Modifier
                             .size(3.dp)
-                            .background(GoldAccent.copy(alpha = 0.3f))
+                            .background(GoldAccent.copy(alpha = 0.3f), CircleShape)
                             .align(Alignment.BottomEnd)
                             .offset(x = (-6).dp, y = (-6).dp)
                     )
@@ -671,13 +671,22 @@ fun DreamListItemRedesigned(
 
             Column(
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(6.dp)
+                verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(
-                    text = dreamItem.text.substringAfter(":").trimStart(),
-                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Normal),
+                    text = dreamItem.text,
+                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
                     color = MaterialTheme.colorScheme.onSurface,
-                    lineHeight = 23.sp,
+                    lineHeight = 22.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.animateContentSize()
+                )
+                Text(
+                    text = dreamItem.meaning,
+                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Normal),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    lineHeight = 20.sp,
                     maxLines = 3,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.animateContentSize()
@@ -693,3 +702,4 @@ fun DreamListItemRedesigned(
         }
     }
 }
+
