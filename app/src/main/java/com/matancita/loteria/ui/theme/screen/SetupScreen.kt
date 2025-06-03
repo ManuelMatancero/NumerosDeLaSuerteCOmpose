@@ -127,7 +127,7 @@ fun SetupScreen(
             Spacer(modifier = Modifier.height((screenHeightDp * 0.02f).coerceAtLeast(16.dp)))
 
             Image(
-                painter = painterResource(id = R.drawable.ic_launcher_foreground),
+                painter = painterResource(id = R.drawable.suertelogo),
                 contentDescription = "Logo de la App",
                 modifier = Modifier
                     .size(imageSize)
@@ -137,7 +137,7 @@ fun SetupScreen(
             Spacer(modifier = Modifier.height((screenHeightDp * 0.03f).coerceIn(16.dp, 28.dp)))
 
             Text(
-                "¡Bienvenido al Oráculo!",
+                "¡Bienvenido a Numeros de La Suerte Y Sueños!",
                 fontSize = titleFontSize,
                 fontWeight = FontWeight.Bold,
                 fontFamily = FontFamily.Serif,

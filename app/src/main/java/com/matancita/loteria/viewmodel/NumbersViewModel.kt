@@ -27,6 +27,9 @@ class NumbersViewModel(application: Application) : AndroidViewModel(application)
     private val _canGenerateScreen1 = MutableStateFlow(true)
     val canGenerateScreen1: StateFlow<Boolean> = _canGenerateScreen1.asStateFlow()
 
+//    private val _showInterstitial = MutableStateFlow(false)
+//    val showInterstitial: StateFlow<Boolean> = _showInterstitial.asStateFlow()
+
     // Screen 2
     private val _screen2NumbersData = MutableStateFlow<DailyNumbersData?>(null)
     val screen2NumbersData: StateFlow<DailyNumbersData?> = _screen2NumbersData.asStateFlow()

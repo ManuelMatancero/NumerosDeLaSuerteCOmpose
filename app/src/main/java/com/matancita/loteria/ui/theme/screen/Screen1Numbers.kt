@@ -84,6 +84,7 @@ fun Screen1Numbers(
     var isAnimating by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
     val haptic = LocalHapticFeedback.current
+    val numbersGeneratedState = remember { mutableStateOf(false) }
 
     //Interstitial AdManager
     val context = LocalContext.current
@@ -107,7 +108,7 @@ fun Screen1Numbers(
             } else {
 
             }
-            showInterstitialTrigger = false // Reiniciar el trigger después de mostrar el anuncio
+
         }
     }
     //FIN Interstitial ad //////
@@ -294,13 +295,20 @@ fun Screen1Numbers(
         )
 
         Spacer(modifier = Modifier.height(32.dp))
+        //delay para mostrar anuncio
+        if (numbersGeneratedState.value) {
+            LaunchedEffect(Unit) {
+                delay(3000)
+                showInterstitialTrigger = true
+            }
+        }
 
         Button(
             onClick = {
                 if (!isAnimating) {
                     userProfile?.let { currentProfile ->
                         numbersViewModel.generateNumbersForScreen("screen1", 3, currentProfile)
-                        showInterstitialTrigger = true
+                        numbersGeneratedState.value = true
                     }
                 }
             },
