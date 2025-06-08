@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback // IMPORTADO
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType // IMPORTADO
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -30,6 +31,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.matancita.loteria.R
+import com.matancita.loteria.anuncios.AdmobAdaptiveBanner
+import com.matancita.loteria.anuncios.AdvancedNativeAdView
+import com.matancita.loteria.anuncios.TEST_ADAPTIVE_BANNER_AD_UNIT_ID
 import com.matancita.loteria.ui.theme.DisabledButtonColor
 import com.matancita.loteria.ui.theme.GoldAccent
 import com.matancita.loteria.ui.theme.LightGreen
@@ -174,7 +179,7 @@ fun Screen2Numbers(
         Spacer(modifier = Modifier.weight(0.5f))
 
         val profile = userProfile
-        val baseTitle = "tus 5 Números Mágicos"
+        val baseTitle =  stringResource(R.string.magic_numbers_title_user)
         val titleText = if (profile != null && profile.name.isNotBlank()) {
             val nameParts = profile.name.split(" ")
             val displayName = if (nameParts.isNotEmpty() && nameParts[0].length <= 12) {
@@ -200,7 +205,7 @@ fun Screen2Numbers(
         )
 
         Text(
-            text = "El cosmos te entrega sus secretos:",
+            text = stringResource(R.string.cosmos_subtitle),
             fontFamily = FontFamily.Serif,
             fontSize = 18.sp,
             color = LuckyGreen.copy(alpha = 0.9f),
@@ -293,15 +298,20 @@ fun Screen2Numbers(
             Spacer(Modifier.size(ButtonDefaults.IconSpacing))
             Text(
                 text = when {
-                    isAnimating -> "REVELANDO..." // Texto actualizado
-                    canGenerate -> "¡REVELAR NÚMEROS!"
-                    else -> "VUELVE MAÑANA"
+                    isAnimating -> stringResource(R.string.button_state_revealing)// Texto actualizado
+                    canGenerate -> stringResource(R.string.button_state_reveal)
+                    else -> stringResource(R.string.button_state_come_back)
                 },
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold
             )
         }
         Spacer(modifier = Modifier.weight(1f))
+        // --- AQUÍ INSERTAS EL ANUNCIO NATIVO ---
+        // Añade un poco de espacio y luego el Composable del anuncio nativo.
+        Spacer(modifier = Modifier.height(24.dp))
+        AdvancedNativeAdView()
+        Spacer(modifier = Modifier.height(16.dp))
     }
 }
 

@@ -22,6 +22,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -41,20 +42,7 @@ import com.matancita.loteria.viewmodel.UserDataViewModel
 import java.text.SimpleDateFormat
 import java.util.*
 
-// Suponiendo que Color.darken() está disponible
-/*
-fun Color.darken(factor: Float): Color {
-    val invertedFactor = (1 - factor).coerceIn(0f, 1f)
-    return Color(
-        red = this.red * invertedFactor,
-        green = this.green * invertedFactor,
-        blue = this.blue * invertedFactor,
-        alpha = this.alpha
-    )
-}
-*/
-
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class) // Añadir ExperimentalLayoutApi para imePadding
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun SetupScreen(
     userDataViewModel: UserDataViewModel,
@@ -68,7 +56,8 @@ fun SetupScreen(
     dobTimestamp?.let { calendar.timeInMillis = it }
 
     val dateFormatter = SimpleDateFormat("dd / MM / yy", Locale.getDefault())
-    val selectedDateText = dobTimestamp?.let { dateFormatter.format(Date(it)) } ?: "Fecha de Nacimiento"
+    // IMPLEMENTACIÓN: Usa el placeholder del string resource
+    val selectedDateText = dobTimestamp?.let { dateFormatter.format(Date(it)) } ?: stringResource(id = R.string.setup_dob_placeholder)
 
     val openDialog = remember { mutableStateOf(false) }
 
@@ -120,7 +109,7 @@ fun SetupScreen(
                 .widthIn(max = 550.dp)
                 .padding(horizontal = 24.dp)
                 .verticalScroll(rememberScrollState())
-                .imePadding(), // <--- MEJORA CLAVE AQUÍ: Añade padding para el teclado
+                .imePadding(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
@@ -128,7 +117,8 @@ fun SetupScreen(
 
             Image(
                 painter = painterResource(id = R.drawable.suertelogo),
-                contentDescription = "Logo de la App",
+                // IMPLEMENTACIÓN: contentDescription desde strings
+                contentDescription = stringResource(id = R.string.setup_app_logo_cd),
                 modifier = Modifier
                     .size(imageSize)
                     .clip(RoundedCornerShape((imageSize.value * 0.2f).dp)),
@@ -137,7 +127,8 @@ fun SetupScreen(
             Spacer(modifier = Modifier.height((screenHeightDp * 0.03f).coerceIn(16.dp, 28.dp)))
 
             Text(
-                "¡Bienvenido a Numeros de La Suerte Y Sueños!",
+                // IMPLEMENTACIÓN: Título desde strings
+                text = stringResource(id = R.string.setup_welcome_title),
                 fontSize = titleFontSize,
                 fontWeight = FontWeight.Bold,
                 fontFamily = FontFamily.Serif,
@@ -146,7 +137,8 @@ fun SetupScreen(
                 modifier = Modifier.padding(bottom = (screenHeightDp * 0.015f).coerceIn(8.dp, 12.dp))
             )
             Text(
-                "Ingresa tus datos para una experiencia mística.",
+                // IMPLEMENTACIÓN: Subtítulo desde strings
+                text = stringResource(id = R.string.setup_welcome_subtitle),
                 fontSize = subtitleFontSize,
                 fontFamily = FontFamily.SansSerif,
                 color = LuckyGreen.copy(alpha = 0.8f),
@@ -157,7 +149,8 @@ fun SetupScreen(
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
-                label = { Text("Tu Nombre Completo", color = LuckyGreen.copy(alpha = 0.7f)) },
+                // IMPLEMENTACIÓN: Label desde strings
+                label = { Text(stringResource(id = R.string.setup_name_label), color = LuckyGreen.copy(alpha = 0.7f)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(28.dp),
@@ -208,7 +201,8 @@ fun SetupScreen(
                     )
                     Icon(
                         Icons.Filled.CalendarMonth,
-                        contentDescription = "Seleccionar Fecha",
+                        // IMPLEMENTACIÓN: contentDescription desde strings
+                        contentDescription = stringResource(id = R.string.setup_select_date_cd),
                         tint = if (dobTimestamp != null) GoldAccent else LuckyGreen.copy(alpha = 0.7f)
                     )
                 }
@@ -235,7 +229,8 @@ fun SetupScreen(
                 ),
                 elevation = ButtonDefaults.buttonElevation(defaultElevation = 6.dp, pressedElevation = 3.dp)
             ) {
-                Text("GUARDAR Y CONTINUAR", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                // IMPLEMENTACIÓN: Texto del botón desde strings
+                Text(stringResource(id = R.string.setup_button_save), fontWeight = FontWeight.Bold, fontSize = 16.sp)
             }
             Spacer(modifier = Modifier.height((screenHeightDp * 0.02f).coerceAtLeast(16.dp)))
         }

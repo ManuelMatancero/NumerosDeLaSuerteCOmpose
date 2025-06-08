@@ -26,6 +26,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType // Import correcto
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -33,7 +34,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.matancita.loteria.R
 import com.matancita.loteria.anuncios.AdmobAdaptiveBanner
+import com.matancita.loteria.anuncios.AdvancedNativeAdView
 import com.matancita.loteria.anuncios.InterstitialAdManager
 import com.matancita.loteria.anuncios.TEST_ADAPTIVE_BANNER_AD_UNIT_ID
 import com.matancita.loteria.anuncios.TEST_INTERSTITIAL_AD_UNIT_ID
@@ -213,9 +216,10 @@ fun Screen1Numbers(
             } else {
                 profile.name.take(12) + if (profile.name.length > 12) "..." else ""
             }
-            "$displayName, tus Números de la Suerte"
+            stringResource(R.string.lucky_numbers_title_user, displayName)
         } else {
-            "Tus Números de la Suerte"
+            // IMPLEMENTACIÓN DE STRING POR DEFECTO
+            stringResource(R.string.lucky_numbers_title_default)
         }
         val titleFontSize = if (titleText.length > 25) 26.sp else 30.sp
         Text(
@@ -231,7 +235,7 @@ fun Screen1Numbers(
         )
 
         Text(
-            text = "Que la fortuna te sonría hoy:",
+            text = stringResource(R.string.fortune_subtitle),
             fontFamily = FontFamily.Serif,
             fontSize = 18.sp,
             color = LuckyGreen.copy(alpha = 0.9f),
@@ -332,19 +336,20 @@ fun Screen1Numbers(
             Spacer(Modifier.size(ButtonDefaults.IconSpacing))
             Text(
                 text = when {
-                    isAnimating -> "REVELANDO..."
-                    canGenerate -> "¡GENERAR NÚMEROS!"
-                    else -> "VUELVE MAÑANA"
+                    isAnimating -> stringResource(R.string.button_state_revealing)
+                    canGenerate -> stringResource(R.string.button_state_generate)
+                    else -> stringResource(R.string.button_state_come_back)
                 },
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold
             )
         }
         Spacer(modifier = Modifier.weight(1f))
-        AdmobAdaptiveBanner(
-            adUnitId = TEST_ADAPTIVE_BANNER_AD_UNIT_ID // REEMPLAZA CON TU ID REAL AL PUBLICAR
-            // modifier = Modifier.padding(bottom = ... ) // si necesitas padding específico
-        )
+        // --- AQUÍ INSERTAS EL ANUNCIO NATIVO ---
+        // Añade un poco de espacio y luego el Composable del anuncio nativo.
+        Spacer(modifier = Modifier.height(24.dp))
+        AdvancedNativeAdView()
+        Spacer(modifier = Modifier.height(16.dp))
     }
 }
 

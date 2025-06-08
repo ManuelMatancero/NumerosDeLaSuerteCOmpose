@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Lucky Numbers and Dreams</string>
+    <string name="ad_icon_description">icon</string>
+
+    <!-- Main Titles (Screen 1) -->
+    <string name="lucky_numbers_title_user">%1$s, your Lucky Numbers</string>
+    <string name="lucky_numbers_title_default">Your Lucky Numbers</string>
+    <string name="fortune_subtitle">May fortune smile upon you today:</string>
+
+    <!--TABs-->
+    <string name="tab_suerte">Lucky Today</string>
+    <string name="tab_chance">Chance</string>
+    <string name="tab_dreams">Dreams</string>
+
+    <!-- Daily Notification Texts -->
+    <string name="notification_channel_name">Daily Reminders</string>
+    <string name="notification_channel_description">Notifications to remind you to get your lucky numbers.</string>
+    <string name="notification_title">Your lucky numbers are waiting!</string>
+    <string name="notification_body">Open the app to find out what fate has in store for you today.</string>
+
+    <!-- Titles (Screen 2) -->
+    <string name="magic_numbers_title_user">your 5 Lottery Numbers</string>
+    <string name="magic_numbers_title_default">Your 5 Magic Numbers</string>
+    <string name="cosmos_subtitle">The cosmos reveals its secrets to you:</string>
+
+    <!-- Main Button States -->
+    <string name="button_state_generate">GENERATE NUMBERS!</string>
+    <string name="button_state_reveal">REVEAL NUMBERS!</string>
+    <string name="button_state_revealing">REVEALING…</string>
+    <string name="button_state_come_back">COME BACK TOMORROW</string>
+
+    <!-- No Connection Screen -->
+    <string name="no_connection_title">No Internet Connection</string>
+    <string name="no_connection_message">Please check your connection to use the application.</string>
+    <string name="no_connection_icon_description">No connection icon</string>
+
+    <string name="setup_app_logo_cd">App Logo</string>
+    <string name="setup_welcome_title">Welcome to Lucky Numbers &amp; Dreams!</string>
+    <string name="setup_welcome_subtitle">Enter your details for a mystical experience.</string>
+    <string name="setup_name_label">Your Full Name</string>
+    <string name="setup_dob_placeholder">Date of Birth</string>
+    <string name="setup_select_date_cd">Select Date</string>
+    <string name="setup_button_save">SAVE &amp; CONTINUE</string>
+
+    <!-- =============================================================== -->
+    <!-- NEW STRINGS FOR THE DREAMS SCREEN (Screen3Dreams) -->
+    <!-- =============================================================== -->
+
+    <!-- Titles & General UI -->
+    <string name="dreams_oracle_title">Dream Oracle</string>
+    <string name="dreams_search_placeholder_long">Search dream by word or number…</string>
+    <string name="dreams_search_placeholder_short">Search…</string>
+    <string name="dreams_search_cd">Search</string>
+    <string name="dreams_clear_cd">Clear</string>
+    <string name="dreams_icon_cd">Dream icon</string>
+    <string name="dreams_details_cd">View details</string>
+    <string name="dreams_no_results">No matching dreams were found.</string>
+    <string name="dreams_orb_placeholder">🔮</string>
+
+    <!-- Dream Names (Array) -->
+    <string-array name="dream_names">
+        <item>Water</item>
+        <item>A duck</item>
+        <item>A child</item>
+        <item>A man</item>
+        <item>A woman</item>
+        <item>Cat</item>
+        <item>Dog</item>
+        <item>A snake</item>
+        <item>Fire</item>
+        <item>A dead person</item>
+        <item>Stream</item>
+        <item>A canyon</item>
+        <item>Milk</item>
+        <item>A tree</item>
+        <item>A stick</item>
+        <item>A soldier</item>
+        <item>A black cat</item>
+        <item>A drunk person</item>
+        <item>A fifteen-year-old girl</item>
+        <item>A pretty girl</item>
+        <item>A ring</item>
+        <item>Fish</item>
+        <item>A party</item>
+        <item>A river</item>
+        <item>The woman</item>
+        <item>Ducklings</item>
+        <item>A cook</item>
+        <item>Horses</item>
+        <item>A ghost</item>
+        <item>A mass (church)</item>
+        <item>A mad person</item>
+        <item>A mirror</item>
+        <item>Flowers</item>
+        <item>Light</item>
+        <item>A lot of money</item>
+        <item>Black birds</item>
+        <item>The head</item>
+        <item>A little bird</item>
+        <item>Cheese</item>
+        <item>A dentist</item>
+        <item>Stones</item>
+        <item>Rain</item>
+        <item>Dancing</item>
+        <item>A knife</item>
+        <item>Clothes</item>
+        <item>A toad</item>
+        <item>Jail</item>
+        <item>A pistol</item>
+        <item>Tomato</item>
+        <item>Saints</item>
+        <item>Reviving</item>
+        <item>Meat</item>
+        <item>Bread</item>
+        <item>A saw</item>
+        <item>A ship</item>
+        <item>Cows</item>
+        <item>Music</item>
+        <item>A fall</item>
+        <item>A hunchback</item>
+        <item>A lawyer</item>
+        <item>Plants</item>
+        <item>A school</item>
+        <item>A shotgun</item>
+        <item>A flood</item>
+        <item>Mother and daughter</item>
+        <item>Crying</item>
+        <item>A wedding</item>
+        <item>Women</item>
+        <item>A bite</item>
+        <item>Viper</item>
+        <item>Nephews/Nieces</item>
+        <item>A beggar</item>
+        <item>A vase</item>
+        <item>Injured</item>
+        <item>A dark-skinned person</item>
+        <item>A clown</item>
+        <item>Flames or fire</item>
+        <item>Crutches</item>
+        <item>Balls</item>
+        <item>Mathematics</item>
+        <item>Flowers</item>
+        <item>Fights</item>
+        <item>Happiness</item>
+        <item>A church</item>
+        <item>An outhouse</item>
+        <item>A tourist</item>
+        <item>Lice</item>
+        <item>The pope</item>
+        <item>Mice</item>
+        <item>Fear</item>
+        <item>A painter</item>
+        <item>Toilet</item>
+        <item>A doctor</item>
+        <item>You dreamt you were in love with someone</item>
+        <item>A cemetery</item>
+        <item>Glasses</item>
+        <item>A train</item>
+        <item>A table</item>
+        <item>The flag</item>
+        <item>Siblings</item>
+    </string-array>
+
+    <!-- Dream Meanings (Array) -->
+    <string-array name="dream_meanings">
+        <item>Dreaming of water is generally associated with emotions, spiritual cleansing, or the flow of life.</item>
+        <item>This dream may reflect adaptability, a balance between emotions and rationality.</item>
+        <item>Represents innocence, new beginnings, or vulnerable aspects of the dreamer.</item>
+        <item>May reflect authority, a father figure, or aspects of the masculine self.</item>
+        <item>Represents intuition, emotions, or a mother figure.</item>
+        <item>Dreaming of a cat can symbolize independence, mystery, or intuition.</item>
+        <item>Signifies loyalty, friendship, or protection.</item>
+        <item>May imply transformation, hidden fear, or betrayal.</item>
+        <item>Suggests destruction, intense passion, or renewal.</item>
+        <item>Symbolizes the end of a cycle or something from the past returning.</item>
+        <item>Associated with the flow of life, calmness, or minor decisions.</item>
+        <item>Can represent strength, imminent danger, or explosive events.</item>
+        <item>Symbolizes nutrition, abundance, or maternal care.</item>
+        <item>Represents growth, stability, or a connection with nature.</item>
+        <item>Could indicate simple, fragile things, or insignificant details that have value.</item>
+        <item>Symbolizes discipline, self-defense, or internal struggle.</item>
+        <item>Associated with superstitions, mystery, or heightened intuition.</item>
+        <item>May suggest a lack of control or evasion of reality.</item>
+        <item>Reflects transition, celebration, or female youth.</item>
+        <item>Represents innocent beauty, tenderness, or happy moments.</item>
+        <item>Signifies commitment, a complete cycle, or union.</item>
+        <item>Abundance, opportunities, or unconscious desires.</item>
+        <item>Joy, celebration, or the need for socialization.</item>
+        <item>Symbolizes deep emotions, transitions, or the flow of life.</item>
+        <item>Feminine element, sensitivity, or emotional connection.</item>
+        <item>Innocence, maternal protection, or following.</item>
+        <item>Nutrition, preparation, or creativity in the everyday environment.</item>
+        <item>Strength, freedom, or wild instincts.</item>
+        <item>Guilt, an unresolved past, or hidden fears.</item>
+        <item>Spirituality, reflection, or community.</item>
+        <item>Lack of control, overflowing creativity, or inner conflict.</item>
+        <item>Self-evaluation, inner truth, or perception.</item>
+        <item>Beauty, emotional growth, or recognition.</item>
+        <item>Enlightenment, understanding, or hope.</item>
+        <item>Desire for abundance, power, or security.</item>
+        <item>Omens, fears, or hidden mysteries.</item>
+        <item>Thoughts, reasoning, or identity.</item>
+        <item>Messages, hope, or freedom.</item>
+        <item>Reward, satisfaction, or nourishing aspects.</item>
+        <item>Self-care, repressed pain, or concern about one\'s image.</item>
+        <item>Obstacles, firmness, or emotional burdens.</item>
+        <item>Emotional cleansing, sadness, or renewal.</item>
+        <item>Joy, expression, or personal freedom.</item>
+        <item>Conflicts, betrayal, or difficult decisions.</item>
+        <item>Identity, protection, or external expression.</item>
+        <item>Transformation, hidden aspects, or emotional cleansing.</item>
+        <item>Limitation, guilt, or personal restrictions.</item>
+        <item>Danger, defense, or contained aggression.</item>
+        <item>Vitality, passion, or healthy eating.</item>
+        <item>Spiritual protection, faith, or divine guidance.</item>
+        <item>Rebirth, a second chance, or past lessons.</item>
+        <item>Basic desires, energy, or physical need.</item>
+        <item>Sustenance, simplicity, or basic needs.</item>
+        <item>Work, effort, or the need to cut ties with something.</item>
+        <item>Journeys, deep emotions, or personal transit.</item>
+        <item>Abundance, calmness, or fertility.</item>
+        <item>Emotional expression, harmony, or inspiration.</item>
+        <item>Failure, loss of control, or insecurity.</item>
+        <item>Emotional burden, complexes, or overcome difficulty.</item>
+        <item>Justice, legal decisions, or the search for balance.</item>
+        <item>Growth, nature, or constant renewal.</item>
+        <item>Learning, personal development, or the past.</item>
+        <item>Defense, power, or forceful action.</item>
+        <item>Overwhelming emotions, crisis, or forced renewal.</item>
+        <item>Relationships, protection, and strong emotional bonds.</item>
+        <item>Emotional release, sadness, or the need for relief.</item>
+        <item>Union, commitment, or new stages.</item>
+        <item>Feminine energy, relationships, or multiple intuitions.</item>
+        <item>Attack, betrayal, or intense desire.</item>
+        <item>Threat, betrayal, or repressed sexual energy.</item>
+        <item>Family ties, youth, or emotional responsibility.</item>
+        <item>Lack, humility, or the need for help.</item>
+        <item>Beauty, fragility, or emotional containment.</item>
+        <item>Emotional pain, internal wounds, or vulnerability.</item>
+        <item>Diversity, strength, or cultural connection.</item>
+        <item>Falseness, feigned joy, or emotional confusion.</item>
+        <item>Transformation, intense passion, or warning.</item>
+        <item>Support, dependence, or recovery.</item>
+        <item>Play, youthful energy, or the ability to adapt.</item>
+        <item>Reasoning, logic, or problem-solving.</item>
+        <item>Symbolizes beauty, positive emotions, or recognition.</item>
+        <item>Internal conflicts or with others, struggle for control.</item>
+        <item>Ideal state, emotional well-being, or personal goal.</item>
+        <item>Faith, moral guidance, or spiritual refuge.</item>
+        <item>Desire to free oneself from emotional burdens or shameful aspects.</item>
+        <item>Exploration, new experiences, or disconnection.</item>
+        <item>Worry, small annoyances, or invasive thoughts.</item>
+        <item>Spiritual authority, guidance, or respect.</item>
+        <item>Small fears, worries, or lack of confidence.</item>
+        <item>Insecurity, warning, or emotional confrontation.</item>
+        <item>Creativity, artistic expression, or perception.</item>
+        <item>Elimination of the unnecessary, emotional cleansing.</item>
+        <item>Healing, help, or the need for care.</item>
+        <item>Desire, idealization, or unresolved emotions.</item>
+        <item>Closing of cycles, memories, or transformation.</item>
+        <item>Clarity, perspective, or the need to see a situation better.</item>
+        <item>Destiny, planning, or uncontrollable events.</item>
+        <item>Unity, dialogue, or common sustenance.</item>
+        <item>Identity, patriotism, or loyalty.</item>
+        <item>Family relationships, union, or aspects of the self reflected in others.</item>
+    </string-array>
+</resources>

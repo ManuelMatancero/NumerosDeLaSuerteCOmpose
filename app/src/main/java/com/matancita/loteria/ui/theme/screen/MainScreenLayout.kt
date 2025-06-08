@@ -48,10 +48,32 @@ fun Color.darken(factor: Float): Color {
 }
 */
 
-sealed class BottomNavItem(val route: String, val icon: ImageVector, val label: String) {
-    object Screen1 : BottomNavItem(AppDestinations.SCREEN_1_NUMBERS, Icons.Filled.Looks3, "3 Números")
-    object Screen2 : BottomNavItem(AppDestinations.SCREEN_2_NUMBERS, Icons.Filled.Looks5, "5 Números")
-    object Screen3 : BottomNavItem(AppDestinations.SCREEN_3_DREAMS, Icons.Filled.Favorite, "Sueños")
+import androidx.annotation.StringRes
+import androidx.compose.ui.res.stringResource
+import com.matancita.loteria.R // Asegúrate de importar R
+
+// ... otras importaciones
+
+sealed class BottomNavItem(
+    val route: String,
+    val icon: ImageVector,
+    @StringRes val labelResId: Int // Cambia 'label' por 'labelResId' y el tipo a Int
+) {
+    object Screen1 : BottomNavItem(
+        AppDestinations.SCREEN_1_NUMBERS,
+        Icons.Filled.Looks3,
+        R.string.tab_suerte // Usa el ID del recurso
+    )
+    object Screen2 : BottomNavItem(
+        AppDestinations.SCREEN_2_NUMBERS,
+        Icons.Filled.Looks5,
+        R.string.tab_chance // Usa el ID del recurso
+    )
+    object Screen3 : BottomNavItem(
+        AppDestinations.SCREEN_3_DREAMS,
+        Icons.Filled.Favorite,
+        R.string.tab_dreams// Usa el ID del recurso
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -117,9 +139,10 @@ fun BottomNavigationBar(
     ) {
         items.forEach { item ->
             val isSelected = currentRoute == item.route
+            val labelText = stringResource(id = item.labelResId)
             NavigationBarItem(
-                icon = { Icon(item.icon, contentDescription = item.label) },
-                label = { Text(item.label, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal, fontSize = 11.sp) }, // MEJORA: Texto en negrita si está seleccionado y tamaño ajustado
+                icon = { Icon(item.icon, contentDescription = labelText) },
+                label = { Text(labelText, fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal, fontSize = 11.sp) }, // MEJORA: Texto en negrita si está seleccionado y tamaño ajustado
                 selected = isSelected,
                 onClick = {
                     if (currentRoute != item.route) {

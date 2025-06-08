@@ -2,11 +2,16 @@ package com.matancita.loteria.anuncios
 
 import android.app.Activity
 import android.content.Context
+import android.hardware.display.DisplayManager
+import android.os.Build
 import android.util.DisplayMetrics
 import android.util.Log
+import android.view.Display
+import android.view.WindowInsets
 import android.view.WindowManager
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Text
@@ -45,14 +50,29 @@ fun AdmobAdaptiveBanner(
         if (isInEditMode) return@LaunchedEffect
 
         try {
-            val display = (context as? Activity)?.windowManager?.defaultDisplay
-            val outMetrics = DisplayMetrics()
-            display?.getMetrics(outMetrics)
+            val density: Float
+            val widthPixels: Int
 
-            val density = outMetrics.density
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+                val windowMetrics = windowManager.currentWindowMetrics
+                val insets = windowMetrics.windowInsets
+                    .getInsetsIgnoringVisibility(WindowInsets.Type.navigationBars() or WindowInsets.Type.statusBars())
+                val bounds = windowMetrics.bounds
+                widthPixels = bounds.width() - insets.left - insets.right
+                density = context.resources.displayMetrics.density
+            } else {
+                @Suppress("DEPRECATION")
+                val displayMetrics = DisplayMetrics()
+                @Suppress("DEPRECATION")
+                (context as Activity).windowManager.defaultDisplay.getRealMetrics(displayMetrics)
+                widthPixels = displayMetrics.widthPixels
+                density = displayMetrics.density
+            }
+
             var adWidthPixels = adView.width.toFloat()
             if (adWidthPixels == 0f) {
-                adWidthPixels = outMetrics.widthPixels.toFloat()
+                adWidthPixels = widthPixels.toFloat()
             }
             val adWidth = (adWidthPixels / density).toInt()
 
@@ -60,6 +80,7 @@ fun AdmobAdaptiveBanner(
             adView.setAdSize(AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(context, adWidth))
             val adRequest = AdRequest.Builder().build()
             adView.loadAd(adRequest)
+
         } catch (e: Exception) {
             Log.e(TAG, "Error al cargar el banner adaptable")
             // Considera mostrar un placeholder o nada si hay un error
@@ -80,7 +101,7 @@ fun AdmobAdaptiveBanner(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(50.dp) // Altura típica de un banner
+                    .fillMaxHeight() // Altura típica de un banner
                     .background(Color.Gray.copy(alpha = 0.5f))
             ) {
                 Text(text = "Ad Banner Preview", modifier = Modifier.align(Alignment.Center))
@@ -88,7 +109,7 @@ fun AdmobAdaptiveBanner(
         } else {
             AndroidView(
                 factory = { adView },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth().fillMaxHeight()
             )
         }
     }

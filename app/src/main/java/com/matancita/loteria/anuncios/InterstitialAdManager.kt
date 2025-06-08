@@ -11,7 +11,7 @@ import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 
 
-// ID de Unidad de Anuncio de Prueba para Intersticiales: ca-app-pub-3940256099942544/1033173712
+
 const val TEST_INTERSTITIAL_AD_UNIT_ID = "ca-app-pub-9861862421891852/3574997556"
 private const val TAG2 = "InterstitialAdManager"
 
