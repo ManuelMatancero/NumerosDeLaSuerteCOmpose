@@ -12,6 +12,8 @@
     <string name="tab_suerte">Lucky Today</string>
     <string name="tab_chance">Chance</string>
     <string name="tab_dreams">Dreams</string>
+    <string name="tab_horoscope">Horoscope</string>
+    <string name="dreams_shake_hint">Shake the phone and get a dream</string>
 
     <!-- Daily Notification Texts -->
     <string name="notification_channel_name">Daily Reminders</string>
@@ -57,6 +59,30 @@
     <string name="dreams_details_cd">View details</string>
     <string name="dreams_no_results">No matching dreams were found.</string>
     <string name="dreams_orb_placeholder">🔮</string>
+
+    <string name="horoscope_title">Your Astral Destiny</string>
+    <string name="horoscope_change_sign">Change Sign</string>
+    <string name="horoscope_tap_stars_instruction">Tap the stars to align your luck...</string>
+    <string name="horoscope_confirm_change_title">Confirm Change</string>
+    <string name="horoscope_confirm_change_message">You\'ll be able to see the new numbers for %1$s starting tomorrow.</string>
+    <string name="horoscope_select_sign_title">Choose your Zodiac Sign</string>
+    <string name="common_continue">Continue</string>
+    <string name="common_cancel">Cancel</string>
+
+    <string-array name="zodiac_signs">
+        <item>Aries</item>
+        <item>Taurus</item>
+        <item>Gemini</item>
+        <item>Cancer</item>
+        <item>Leo</item>
+        <item>Virgo</item>
+        <item>Libra</item>
+        <item>Scorpio</item>
+        <item>Sagittarius</item>
+        <item>Capricorn</item>
+        <item>Aquarius</item>
+        <item>Pisces</item>
+    </string-array>
 
     <!-- Dream Names (Array) -->
     <string-array name="dream_names">

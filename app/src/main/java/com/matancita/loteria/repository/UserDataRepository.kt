@@ -10,6 +10,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import java.io.IOException
 
@@ -17,13 +18,15 @@ val Context.userDataStore: DataStore<Preferences> by preferencesDataStore(name =
 
 data class UserProfile(
     val name: String,
-    val dob: Long // Store Date of Birth as Long (timestamp)
+    val dob: Long,
+    val zodiacSign: String? = null
 )
 
 class UserDataRepository(private val context: Context) {
     private object PreferencesKeys {
         val USER_NAME = stringPreferencesKey("user_name")
         val USER_DOB = longPreferencesKey("user_dob")
+        val USER_ZODIAC_SIGN = stringPreferencesKey("user_zodiac_sign")
     }
 
     val userProfileFlow: Flow<UserProfile?> = context.userDataStore.data
@@ -37,17 +40,30 @@ class UserDataRepository(private val context: Context) {
         .map { preferences ->
             val name = preferences[PreferencesKeys.USER_NAME]
             val dob = preferences[PreferencesKeys.USER_DOB]
+
+            // --- LÓGICA CORREGIDA ---
             if (name != null && dob != null) {
-                UserProfile(name, dob)
+                // Si tenemos los datos base, creamos el perfil.
+                // El signo es opcional y puede ser null.
+                val zodiacSign = preferences[PreferencesKeys.USER_ZODIAC_SIGN]
+                UserProfile(name, dob, zodiacSign)
             } else {
+                // Solo si faltan los datos base, el perfil es null.
                 null
             }
         }
 
-    suspend fun saveUserProfile(name: String, dob: Long) {
+    /**
+     * Guarda el perfil completo. Esta es ahora la ÚNICA función que escribe los datos del usuario.
+     */
+    suspend fun saveUserProfile(name: String, dob: Long, zodiacSign: String? = null) {
         context.userDataStore.edit { preferences ->
             preferences[PreferencesKeys.USER_NAME] = name
             preferences[PreferencesKeys.USER_DOB] = dob
+            // Si el signo no es nulo, lo guardamos. Si es nulo, no lo tocamos.
+            zodiacSign?.let {
+                preferences[PreferencesKeys.USER_ZODIAC_SIGN] = it
+            }
         }
     }
 

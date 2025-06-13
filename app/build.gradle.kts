@@ -76,4 +76,18 @@ dependencies {
     implementation(libs.play.services.ads)
 
     implementation(libs.androidx.work.runtime.ktx)
+
+
+    // Retrofit para networking
+    implementation ("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation ("com.squareup.retrofit2:converter-moshi:2.9.0")
+
+    // Moshi para p(arsear JSON
+    implementation ("com.squareup.moshi:moshi-kotlin:1.15.0")
+
+    // BoM de Firebase (Bill of Materials) para manejar versiones
+    implementation(platform("com.google.firebase:firebase-bom:33.1.1"))
+
+    // Dependencia específica para ML Kit On-Device Translation
+    implementation("com.google.mlkit:translate:17.0.2")
 }

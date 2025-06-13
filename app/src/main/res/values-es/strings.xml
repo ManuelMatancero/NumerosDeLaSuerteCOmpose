@@ -85,35 +85,19 @@
         <item>Acuario</item>
         <item>Piscis</item>
     </string-array>
-
-    <string-array name="zodiac_signs_english_keys">
-        <item>Aries</item>
-        <item>Taurus</item>
-        <item>Gemini</item>
-        <item>Cancer</item>
-        <item>Leo</item>
-        <item>Virgo</item>
-        <item>Libra</item>
-        <item>Scorpio</item>
-        <item>Sagittarius</item>
-        <item>Capricorn</item>
-        <item>Aquarius</item>
-        <item>Pisces</item>
-    </string-array>
-
     <string-array name="zodiac_signs_display_names">
         <item>Aries</item>
-        <item>Taurus</item>
-        <item>Gemini</item>
-        <item>Cancer</item>
+        <item>Tauro</item>
+        <item>Géminis</item>
+        <item>Cáncer</item>
         <item>Leo</item>
         <item>Virgo</item>
         <item>Libra</item>
-        <item>Scorpio</item>
-        <item>Sagittarius</item>
-        <item>Capricorn</item>
-        <item>Aquarius</item>
-        <item>Pisces</item>
+        <item>Escorpio</item>
+        <item>Sagitario</item>
+        <item>Capricornio</item>
+        <item>Acuario</item>
+        <item>Piscis</item>
     </string-array>
 
     <!-- Nombres de los sueños (Array) -->

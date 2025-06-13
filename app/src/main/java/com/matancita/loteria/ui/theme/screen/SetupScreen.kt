@@ -1,26 +1,55 @@
 package com.matancita.loteria.ui.theme.screen
 
 import android.app.DatePickerDialog
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.rounded.Sync
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -34,13 +63,26 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.matancita.loteria.R
+import com.matancita.loteria.anuncios.AdvancedNativeAdView
+import com.matancita.loteria.ui.theme.DisabledButtonColor
 import com.matancita.loteria.ui.theme.GoldAccent
-import com.matancita.loteria.ui.theme.LightGreen
-import com.matancita.loteria.ui.theme.LuckyGreen
+import com.matancita.loteria.viewmodel.HoroscopeViewModel
 import com.matancita.loteria.viewmodel.UserDataViewModel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.joinAll
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.math.cos
+import kotlin.math.sin
+import kotlin.random.Random
+
+
+// --- Pantalla de Configuración Rediseñada ---
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -55,14 +97,13 @@ fun SetupScreen(
 
     dobTimestamp?.let { calendar.timeInMillis = it }
 
-    val dateFormatter = SimpleDateFormat("dd / MM / yy", Locale.getDefault())
-    // IMPLEMENTACIÓN: Usa el placeholder del string resource
+    val dateFormatter = SimpleDateFormat("dd / MM / yyyy", Locale.getDefault())
     val selectedDateText = dobTimestamp?.let { dateFormatter.format(Date(it)) } ?: stringResource(id = R.string.setup_dob_placeholder)
 
     val openDialog = remember { mutableStateOf(false) }
 
     if (openDialog.value) {
-        DatePickerDialog(
+        val datePickerDialog = DatePickerDialog(
             context,
             { _, year, month, dayOfMonth ->
                 calendar.set(Calendar.YEAR, year)
@@ -74,35 +115,16 @@ fun SetupScreen(
             calendar.get(Calendar.YEAR),
             calendar.get(Calendar.MONTH),
             calendar.get(Calendar.DAY_OF_MONTH)
-        ).apply {
-            datePicker.maxDate = System.currentTimeMillis()
-            show()
-        }
+        )
+        datePickerDialog.datePicker.maxDate = System.currentTimeMillis()
+        datePickerDialog.show()
+        // Recordar descartar el diálogo si el usuario cancela
+        datePickerDialog.setOnDismissListener { openDialog.value = false }
     }
 
-    val configuration = LocalConfiguration.current
-    val screenWidthDp = configuration.screenWidthDp.dp
-    val screenHeightDp = configuration.screenHeightDp.dp
+    Box(modifier = Modifier.fillMaxSize()) {
+        StarryNightBackground()
 
-    val imageSize: Dp = (screenWidthDp * 0.25f).coerceIn(80.dp, 120.dp)
-    val titleFontSize: TextUnit = if (screenWidthDp < 360.dp) 26.sp else 30.sp
-    val subtitleFontSize: TextUnit = if (screenWidthDp < 360.dp) 14.sp else 16.sp
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    listOf(
-                        LuckyGreen.copy(alpha = 0.2f),
-                        LightGreen.copy(alpha = 0.3f),
-                        LuckyGreen.copy(alpha = 0.25f)
-                    )
-                )
-            )
-            .padding(vertical = 16.dp),
-        contentAlignment = Alignment.Center
-    ) {
         Column(
             modifier = Modifier
                 .fillMaxHeight()
@@ -113,107 +135,96 @@ fun SetupScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Spacer(modifier = Modifier.height((screenHeightDp * 0.02f).coerceAtLeast(16.dp)))
+            Spacer(modifier = Modifier.height(32.dp))
 
             Image(
                 painter = painterResource(id = R.drawable.suertelogo),
-                // IMPLEMENTACIÓN: contentDescription desde strings
                 contentDescription = stringResource(id = R.string.setup_app_logo_cd),
                 modifier = Modifier
-                    .size(imageSize)
-                    .clip(RoundedCornerShape((imageSize.value * 0.2f).dp)),
+                    .size(100.dp)
+                    .clip(CircleShape)
+                    .border(BorderStroke(2.dp, Color.White.copy(alpha = 0.3f)), CircleShape),
                 contentScale = ContentScale.Crop
             )
-            Spacer(modifier = Modifier.height((screenHeightDp * 0.03f).coerceIn(16.dp, 28.dp)))
+            Spacer(modifier = Modifier.height(24.dp))
 
             Text(
-                // IMPLEMENTACIÓN: Título desde strings
                 text = stringResource(id = R.string.setup_welcome_title),
-                fontSize = titleFontSize,
+                fontSize = 30.sp,
                 fontWeight = FontWeight.Bold,
                 fontFamily = FontFamily.Serif,
-                color = LuckyGreen.darken(0.1f),
+                color = Color.White.copy(alpha = 0.9f),
                 textAlign = TextAlign.Center,
-                modifier = Modifier.padding(bottom = (screenHeightDp * 0.015f).coerceIn(8.dp, 12.dp))
+                modifier = Modifier.padding(bottom = 12.dp)
             )
             Text(
-                // IMPLEMENTACIÓN: Subtítulo desde strings
                 text = stringResource(id = R.string.setup_welcome_subtitle),
-                fontSize = subtitleFontSize,
+                fontSize = 16.sp,
                 fontFamily = FontFamily.SansSerif,
-                color = LuckyGreen.copy(alpha = 0.8f),
+                color = Color.White.copy(alpha = 0.7f),
                 textAlign = TextAlign.Center,
-                modifier = Modifier.padding(bottom = (screenHeightDp * 0.035f).coerceIn(24.dp, 36.dp))
+                modifier = Modifier.padding(bottom = 32.dp)
             )
 
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
-                // IMPLEMENTACIÓN: Label desde strings
-                label = { Text(stringResource(id = R.string.setup_name_label), color = LuckyGreen.copy(alpha = 0.7f)) },
+                label = { Text(stringResource(id = R.string.setup_name_label)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(28.dp),
-                textStyle = TextStyle(color = LuckyGreen.darken(0.1f), fontSize = 16.sp),
+                shape = RoundedCornerShape(50),
+                textStyle = TextStyle(color = Color.White.copy(alpha = 0.9f), fontSize = 16.sp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = LuckyGreen.darken(0.2f),
-                    unfocusedTextColor = LuckyGreen.darken(0.1f),
-                    focusedContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.6f),
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.4f),
-                    cursorColor = GoldAccent,
-                    focusedBorderColor = GoldAccent,
-                    unfocusedBorderColor = LuckyGreen.copy(alpha = 0.4f),
-                    focusedLabelColor = GoldAccent,
-                    unfocusedLabelColor = LuckyGreen.copy(alpha = 0.7f)
+                    focusedContainerColor = Color.White.copy(alpha = 0.1f),
+                    unfocusedContainerColor = Color.White.copy(alpha = 0.05f),
+                    cursorColor = Color.White,
+                    focusedBorderColor = Color.White.copy(alpha = 0.7f),
+                    unfocusedBorderColor = Color.White.copy(alpha = 0.3f),
+                    focusedLabelColor = Color.White.copy(alpha = 0.8f),
+                    unfocusedLabelColor = Color.White.copy(alpha = 0.6f)
                 ),
                 keyboardOptions = KeyboardOptions(
                     capitalization = KeyboardCapitalization.Words,
                     imeAction = ImeAction.Next
                 )
             )
-            Spacer(modifier = Modifier.height((screenHeightDp * 0.02f).coerceIn(16.dp, 20.dp)))
+            Spacer(modifier = Modifier.height(20.dp))
 
             OutlinedButton(
                 onClick = { openDialog.value = true },
                 modifier = Modifier
                     .fillMaxWidth()
                     .defaultMinSize(minHeight = 56.dp),
-                shape = RoundedCornerShape(28.dp),
-                border = BorderStroke(1.dp, if (dobTimestamp != null) GoldAccent else LuckyGreen.copy(alpha = 0.4f)),
+                shape = RoundedCornerShape(50),
+                border = BorderStroke(1.dp, if (dobTimestamp != null) Color.White.copy(alpha = 0.7f) else Color.White.copy(alpha = 0.3f)),
                 colors = ButtonDefaults.outlinedButtonColors(
-                    containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.4f)
+                    containerColor = Color.White.copy(alpha = 0.05f)
                 )
             ) {
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 12.dp),
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
                         selectedDateText,
-                        color = if (dobTimestamp != null) LuckyGreen.darken(0.1f) else LuckyGreen.copy(alpha = 0.7f),
-                        fontSize = 16.sp,
-                        modifier = Modifier.weight(1f, fill = false),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        color = if (dobTimestamp != null) Color.White.copy(alpha = 0.9f) else Color.White.copy(alpha = 0.6f),
+                        fontSize = 16.sp
                     )
                     Icon(
                         Icons.Filled.CalendarMonth,
-                        // IMPLEMENTACIÓN: contentDescription desde strings
                         contentDescription = stringResource(id = R.string.setup_select_date_cd),
-                        tint = if (dobTimestamp != null) GoldAccent else LuckyGreen.copy(alpha = 0.7f)
+                        tint = if (dobTimestamp != null) Color.White.copy(alpha = 0.8f) else Color.White.copy(alpha = 0.6f)
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height((screenHeightDp * 0.04f).coerceIn(24.dp, 40.dp)))
+            Spacer(modifier = Modifier.height(40.dp))
 
             Button(
                 onClick = {
                     if (name.isNotBlank() && dobTimestamp != null) {
-                        userDataViewModel.saveUserProfile(name, dobTimestamp!!)
+                        userDataViewModel.saveUserProfile(name.trim(), dobTimestamp!!)
                         onSetupComplete()
                     }
                 },
@@ -221,18 +232,18 @@ fun SetupScreen(
                 modifier = Modifier
                     .fillMaxWidth(0.9f)
                     .height(60.dp),
-                shape = RoundedCornerShape(18.dp),
+                shape = RoundedCornerShape(50),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = LuckyGreen.darken(0.1f),
+                    containerColor = Color(0xFF4A148C).copy(alpha = 0.7f),
                     contentColor = Color.White,
-                    disabledContainerColor = LuckyGreen.copy(alpha = 0.3f, red = 0.6f, green = 0.6f, blue = 0.6f)
+                    disabledContainerColor = Color.White.copy(alpha = 0.1f)
                 ),
-                elevation = ButtonDefaults.buttonElevation(defaultElevation = 6.dp, pressedElevation = 3.dp)
+                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.5f)),
+                elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp, pressedElevation = 4.dp)
             ) {
-                // IMPLEMENTACIÓN: Texto del botón desde strings
-                Text(stringResource(id = R.string.setup_button_save), fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Text(stringResource(id = R.string.setup_button_save), fontWeight = FontWeight.Bold, fontSize = 18.sp)
             }
-            Spacer(modifier = Modifier.height((screenHeightDp * 0.02f).coerceAtLeast(16.dp)))
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }

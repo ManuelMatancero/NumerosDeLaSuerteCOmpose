@@ -8,4 +8,6 @@ object AppDestinations {
     const val SCREEN_1_NUMBERS = "screen1_numbers"
     const val SCREEN_2_NUMBERS = "screen2_numbers"
     const val SCREEN_3_DREAMS = "screen3_dreams"
+    const val SCREEN_4_HOROSCOPE = "screen4_horoscope"
+
 }
