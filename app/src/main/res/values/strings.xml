@@ -70,6 +70,9 @@
     <string name="horoscope_select_sign_title">Elige tu Signo Zodiacal</string>
     <string name="common_continue">Continuar</string>
     <string name="common_cancel">Cancelar</string>
+    <string name="tab_lucky_search">Encuentra</string>
+    <string name="find_fourtune">Busca tu Fortuna</string>
+    <string name="find_fourtune_desc">Desliza tu dedo y revela tus números de hoy</string>
 
     <string-array name="zodiac_signs">
         <item>Aries</item>

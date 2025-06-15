@@ -68,6 +68,9 @@
     <string name="horoscope_select_sign_title">Choose your Zodiac Sign</string>
     <string name="common_continue">Continue</string>
     <string name="common_cancel">Cancel</string>
+    <string name="tab_lucky_search">Find</string>
+    <string name="find_fourtune">Find your fortune</string>
+    <string name="find_fourtune_desc">Swipe your finger and reveal your numbers today</string>
 
     <string-array name="zodiac_signs">
         <item>Aries</item>

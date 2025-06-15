@@ -63,7 +63,7 @@ import kotlin.random.Random
 private const val REVEAL_DURATION_MS_S2 = 1500L
 private const val SETTLE_STAGGER_DELAY_MS_S2 = 350L
 private const val VIBRATION_INTERVAL_MS_S2 = 150L
-private const val SHOW_AD = false
+private const val SHOW_AD = true
 
 @Composable
 fun Screen2Numbers(

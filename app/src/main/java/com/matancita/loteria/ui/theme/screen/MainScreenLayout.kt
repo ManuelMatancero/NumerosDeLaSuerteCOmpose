@@ -7,9 +7,11 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Bed
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Looks3
 import androidx.compose.material.icons.filled.Looks5
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -49,7 +51,8 @@ sealed class BottomNavItem(
     object Screen2 : BottomNavItem(AppDestinations.SCREEN_2_NUMBERS, Icons.Filled.Looks5, R.string.tab_chance)
     // Se usa AutoAwesome para el horóscopo, que encaja mejor con la temática astral.
     object Screen4 : BottomNavItem(AppDestinations.SCREEN_4_HOROSCOPE, Icons.Default.AutoAwesome, R.string.tab_horoscope)
-    object Screen3 : BottomNavItem(AppDestinations.SCREEN_3_DREAMS, Icons.Filled.Favorite, R.string.tab_dreams)
+    object Screen5 : BottomNavItem(AppDestinations.SCREEN_5_LUCKY_SEARCH, Icons.Filled.Search, R.string.tab_lucky_search)
+    object Screen3 : BottomNavItem(AppDestinations.SCREEN_3_DREAMS, Icons.Filled.Bed, R.string.tab_dreams)
 }
 
 // --- Layout Principal Mágico ---
@@ -110,6 +113,7 @@ fun MagicalBottomNavigationBar(
         BottomNavItem.Screen1,
         BottomNavItem.Screen2,
         BottomNavItem.Screen4, // Horóscopo
+        BottomNavItem.Screen5, // Nueva pestaña
         BottomNavItem.Screen3
     )
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -172,6 +176,10 @@ fun MagicalAppNavigationHost(
         composable(BottomNavItem.Screen4.route) {
             // Llama a la pantalla mágica rediseñada
             HoroscopeScreen(userDataViewModel = userDataViewModel, horoscopeViewModel = horoscopeViewModel)
+        }
+        composable(BottomNavItem.Screen5.route) {
+            // Llama a la pantalla mágica rediseñada
+            FindYourLuckScreen()
         }
         composable(BottomNavItem.Screen3.route) {
             // Asumiendo que Screen3Dreams será rediseñada de manera similar

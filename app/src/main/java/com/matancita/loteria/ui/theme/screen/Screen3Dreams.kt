@@ -39,10 +39,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.lerp
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.*
 import androidx.compose.ui.res.stringArrayResource
@@ -611,7 +613,7 @@ private data class ShootingStarState(
 
 @Composable
 fun StarryNightBackground(starCount: Int = 200) {
-    // 1. Recordamos la lista de estrellas para que no se regenere en cada recomposición.
+    // 1. Se recuerda la lista de estrellas para que no se regenere en cada recomposición.
     val stars = remember {
         List(starCount) {
             Star(
@@ -623,13 +625,13 @@ fun StarryNightBackground(starCount: Int = 200) {
         }
     }
 
-    // 2. Creamos una lista de `Animatable` para controlar el alfa de cada estrella individualmente.
+    // 2. Se crean `Animatable` para controlar el alfa de cada estrella individualmente.
     val animatables = remember { stars.map { Animatable(it.baseAlpha) } }
 
-    // 3. Usamos LaunchedEffect para la animación de parpadeo de las estrellas.
+    // 3. Se usa LaunchedEffect para la animación de parpadeo de las estrellas.
     LaunchedEffect(Unit) {
         animatables.forEachIndexed { index, animatable ->
-            if (index % 3 == 0) {
+            if (index % 3 == 0) { // Solo un subconjunto parpadea
                 launch {
                     delay(Random.nextLong(0, 1000))
                     animatable.animateTo(
@@ -651,37 +653,26 @@ fun StarryNightBackground(starCount: Int = 200) {
     var shootingStar by remember { mutableStateOf<ShootingStarState?>(null) }
     val shootingStarProgress = remember { Animatable(0f) }
 
-    // LaunchedEffect para crear y animar estrellas fugaces periódicamente.
     LaunchedEffect(Unit) {
         while (true) {
-            // Espera entre 2 y 6 segundos antes de mostrar una nueva estrella fugaz.
             delay(Random.nextLong(1000, 2000))
-
-            // Define una nueva estrella fugaz con propiedades aleatorias.
             shootingStar = ShootingStarState(
                 startX = Random.nextFloat(),
-                startY = -0.1f, // Comienza justo por encima de la pantalla.
-                angle = Random.nextDouble(120.0, 150.0).toFloat(), // Ángulo hacia abajo.
+                startY = -0.1f,
+                angle = Random.nextDouble(120.0, 150.0).toFloat(),
                 speed = Random.nextFloat() * 0.8f + 0.5f,
                 tailLength = Random.nextFloat() * 200f + 150f
             )
             shootingStarProgress.snapTo(0f)
-
-            // Anima el progreso de la estrella a través de la pantalla.
             shootingStarProgress.animateTo(
                 targetValue = 1f,
-                animationSpec = tween(
-                    durationMillis = Random.nextInt(700, 1500),
-                    easing = LinearEasing
-                )
+                animationSpec = tween(durationMillis = Random.nextInt(700, 1500), easing = LinearEasing)
             )
-
-            // Oculta la estrella después de la animación.
             shootingStar = null
         }
     }
 
-    // 5. Dibujamos el fondo y todos los elementos celestes.
+    // 5. Se dibujan el fondo y todos los elementos celestes.
     Canvas(
         modifier = Modifier
             .fillMaxSize()
@@ -697,11 +688,19 @@ fun StarryNightBackground(starCount: Int = 200) {
     ) {
         // Dibuja las estrellas que parpadean.
         stars.forEachIndexed { index, star ->
+            val animatedAlpha = animatables[index].value
+
+            // CORRECCIÓN: Se interpola el color basado en el brillo de la estrella.
+            // Cuando la estrella está más brillante (alfa más alto), tiende a amarillo.
+            val fraction = ((animatedAlpha - 0.2f) / (star.baseAlpha - 0.2f)).coerceIn(0f, 1f)
+            val yellowTint = Color(0xFFFFF5B2) // Un amarillo suave
+            val currentColor = lerp(Color.White, yellowTint, fraction)
+
             drawCircle(
-                color = Color.White,
+                color = currentColor, // Se usa el color animado.
                 center = Offset(star.x * size.width, star.y * size.height),
                 radius = star.radius,
-                alpha = animatables[index].value
+                alpha = animatedAlpha
             )
         }
 
@@ -711,39 +710,21 @@ fun StarryNightBackground(starCount: Int = 200) {
             if (progress > 0) {
                 val angleRad = Math.toRadians(star.angle.toDouble()).toFloat()
                 val distance = size.height * 1.5f * star.speed
-
                 val currentX = star.startX * size.width + cos(angleRad) * distance * progress
                 val currentY = star.startY * size.height + sin(angleRad) * distance * progress
-
                 val tailX = currentX - cos(angleRad) * star.tailLength
                 val tailY = currentY - sin(angleRad) * star.tailLength
-
                 val headPosition = Offset(currentX, currentY)
                 val tailPosition = Offset(tailX, tailY)
-
-                // Dibuja la estela con un gradiente para un efecto de desvanecimiento.
                 drawLine(
-                    brush = Brush.linearGradient(
-                        colors = listOf(Color.White, Color.Transparent),
-                        start = headPosition,
-                        end = tailPosition
-                    ),
-                    start = headPosition,
-                    end = tailPosition,
-                    strokeWidth = 2.5f
+                    brush = Brush.linearGradient(colors = listOf(Color.White, Color.Transparent), start = headPosition, end = tailPosition),
+                    start = headPosition, end = tailPosition, strokeWidth = 2.5f
                 )
-
-                // Dibuja la cabeza de la estrella fugaz.
-                drawCircle(
-                    color = Color.White,
-                    center = headPosition,
-                    radius = 3.5f
-                )
+                drawCircle(color = Color.White, center = headPosition, radius = 3.5f)
             }
         }
     }
 }
-
 
 
 

@@ -1,5 +1,6 @@
 package com.matancita.loteria.ui.theme.screen
 
+import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
@@ -43,6 +44,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
@@ -58,6 +60,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.matancita.loteria.R
 import com.matancita.loteria.anuncios.AdvancedNativeAdView
+import com.matancita.loteria.anuncios.InterstitialAdManager
+import com.matancita.loteria.anuncios.TEST_INTERSTITIAL_AD_UNIT_ID
 import com.matancita.loteria.ui.theme.DisabledButtonColor
 import com.matancita.loteria.ui.theme.GoldAccent
 import com.matancita.loteria.viewmodel.HoroscopeViewModel
@@ -73,22 +77,6 @@ import kotlin.math.sin
 import kotlin.random.Random
 
 
-// --- Pantalla del Horóscopo Rediseñada ---
-
-//val zodiacConstellations = mapOf(
-//    "Aries" to listOf(Offset(0.2f, 0.4f), Offset(0.4f, 0.3f), Offset(0.6f, 0.45f), Offset(0.8f, 0.6f)),
-//    "Tauro" to listOf(Offset(0.2f, 0.5f), Offset(0.4f, 0.3f), Offset(0.6f, 0.4f), Offset(0.8f, 0.2f), Offset(0.5f, 0.7f)),
-//    "Géminis" to listOf(Offset(0.3f, 0.2f), Offset(0.35f, 0.8f), Offset(0.7f, 0.2f), Offset(0.75f, 0.8f)),
-//    "Cáncer" to listOf(Offset(0.3f, 0.4f), Offset(0.5f, 0.5f), Offset(0.7f, 0.4f), Offset(0.5f, 0.7f)),
-//    "Leo" to listOf(Offset(0.2f, 0.5f), Offset(0.4f, 0.6f), Offset(0.6f, 0.5f), Offset(0.8f, 0.6f), Offset(0.5f, 0.3f)),
-//    "Virgo" to listOf(Offset(0.2f, 0.3f), Offset(0.4f, 0.5f), Offset(0.6f, 0.4f), Offset(0.8f, 0.6f), Offset(0.7f, 0.8f)),
-//    "Libra" to listOf(Offset(0.2f, 0.5f), Offset(0.4f, 0.4f), Offset(0.6f, 0.4f), Offset(0.8f, 0.5f), Offset(0.5f, 0.7f)),
-//    "Escorpio" to listOf(Offset(0.2f, 0.4f), Offset(0.4f, 0.5f), Offset(0.6f, 0.3f), Offset(0.8f, 0.4f), Offset(0.7f, 0.7f)),
-//    "Sagitario" to listOf(Offset(0.2f, 0.6f), Offset(0.4f, 0.4f), Offset(0.6f, 0.5f), Offset(0.8f, 0.3f), Offset(0.7f, 0.7f)),
-//    "Capricornio" to listOf(Offset(0.2f, 0.5f), Offset(0.4f, 0.3f), Offset(0.6f, 0.4f), Offset(0.8f, 0.6f), Offset(0.7f, 0.8f)),
-//    "Acuario" to listOf(Offset(0.2f, 0.4f), Offset(0.4f, 0.6f), Offset(0.6f, 0.3f), Offset(0.8f, 0.5f)),
-//    "Piscis" to listOf(Offset(0.3f, 0.3f), Offset(0.35f, 0.7f), Offset(0.7f, 0.4f), Offset(0.75f, 0.8f))
-//)
 
 // Define constellation points separately. The order must match the string-array.
 val constellationPointsData = listOf(
@@ -114,7 +102,6 @@ val constellationPointsData = listOf(
 //    return signNames.zip(constellationPointsData).toMap()
 //}
 
-//TODO: hacer una funcionalidad donde el usuario pueda encontrar numeros escondidos en el espacio, que pueda buscar con efecto de lupa
 
 @Composable
 fun  HoroscopeScreen(
@@ -138,6 +125,23 @@ fun  HoroscopeScreen(
     var showConfirmationDialog by remember { mutableStateOf(false) }
     var pendingSignKey by remember { mutableStateOf<String?>(null) } // Ahora guardamos la clave
     val haptic = LocalHapticFeedback.current
+    val context = LocalContext.current
+    val activity = LocalActivity.current
+
+    var showInterstitialTrigger by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        InterstitialAdManager.loadAd(context, TEST_INTERSTITIAL_AD_UNIT_ID)
+    }
+
+    if (showInterstitialTrigger) {
+        LaunchedEffect(Unit) {
+            activity?.let {
+                InterstitialAdManager.showAd(it) { /* Ad closed callback */ }
+            }
+            showInterstitialTrigger = false
+        }
+    }
 
     LaunchedEffect(userProfile) {
         userProfile?.zodiacSign?.let {
@@ -227,6 +231,10 @@ fun  HoroscopeScreen(
                             haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         }
                         horoscopeViewModel.onStarTapped(index, totalStars)
+                        if(index == 2){
+                            //Show add
+                            showInterstitialTrigger = true
+                        }
                     }
                 )
 
@@ -254,6 +262,7 @@ fun  HoroscopeScreen(
                             Spacer(Modifier.size(ButtonDefaults.IconSpacing))
                             Text(stringResource(R.string.horoscope_change_sign))
                         }
+
                     }
                 }
                 Spacer(modifier = Modifier.weight(1f))
