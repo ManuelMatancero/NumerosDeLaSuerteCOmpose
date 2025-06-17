@@ -73,6 +73,38 @@
     <string name="tab_lucky_search">Encuentra</string>
     <string name="find_fourtune">Busca tu Fortuna</string>
     <string name="find_fourtune_desc">Desliza tu dedo y revela tus números de hoy</string>
+    <string name="drawer_header_greeting">Bienvenido</string>
+    <string name="drawer_hello">Hola, %1$s</string>
+    <string name="tab_lottery">Leidsa</string>
+    <string name="Super"> Super Loto Mas</string>
+    <string name="kino">SuperKino TV</string>
+    <string name="pool">Loto Pool</string>
+    <string name="pega">Pega Tres</string>
+    <string name="Pale">Quiniela Pale</string>
+    <string name="real">Loteria Real</string>
+
+    <!-- Títulos de Pestañas -->
+    <string name="tab_help">Ayuda</string>
+
+    <!-- Pantalla de Ayuda -->
+    <string name="help_center_title">Centro de Ayuda</string>
+    <string name="help_desc_lucky_numbers">Tus 3 números personales de la suerte, generados a partir de tu perfil. ¡Vuelve cada día para descubrir los nuevos!</string>
+    <string name="help_desc_chance">Una combinación de 5 números para darte una oportunidad extra. Se renuevan diariamente.</string>
+    <string name="help_desc_lottery_games">Resultados simulados para los sorteos más populares. Presiona el botón para generar los números del día.</string>
+    <string name="help_desc_horoscope">Conecta las estrellas de tu constelación zodiacal para revelar tu horóscopo y números astrales del día.</string>
+    <string name="help_desc_find_fortune">Un juego interactivo. Desliza el dedo sobre el área misteriosa para encontrar tus 3 números de la suerte ocultos entre íconos.</string>
+    <string name="help_desc_dreams">¿Soñaste algo? Próximamente aquí podrás encontrar el significado de tus sueños y sus números asociados.</string>
+    <string name="common_save">Guardar</string>
+    <string name="edit_profile_title">Editar Perfil</string>
+    <string name="drawer_open_menu">Abrir menu</string>
+    <string name="drawer_edit_profile">editar perfil</string>
+
+    <string name="oracle_title">El Oráculo del Tiempo</string>
+    <string name="oracle_subtitle">Detén el cosmos en el instante preciso</string>
+    <string name="oracle_stop_button">Detener el Oráculo</string>
+    <string name="oracle_come_back_tomorrow">El destino ha hablado. Vuelve mañana.</string>
+    <string name="tab_oracle">Oráculo del Tiempo</string>
+    <string name="help_desc_oracle">Un reloj astral gira sin cesar. ¡Tócalo en el momento justo para detenerlo y revelar los números que el destino ha elegido para ti!</string>
 
     <string-array name="zodiac_signs">
         <item>Aries</item>

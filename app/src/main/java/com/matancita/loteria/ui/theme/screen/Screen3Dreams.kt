@@ -83,7 +83,7 @@ private data class Star(
     val x: Float,
     val y: Float,
     val radius: Float,
-    val baseAlpha: Float
+    val alpha: Float
 )
 
 // --- Funciones de Composición Principales ---
@@ -614,52 +614,29 @@ private data class ShootingStarState(
 @Composable
 fun StarryNightBackground(starCount: Int = 200) {
     // 1. Se recuerda la lista de estrellas para que no se regenere en cada recomposición.
+    //    Las estrellas ahora tienen un alfa estático y aleatorio.
     val stars = remember {
         List(starCount) {
             Star(
                 x = Random.nextFloat(),
                 y = Random.nextFloat(),
-                radius = Random.nextFloat() * 2.2f + 0.8f,
-                baseAlpha = Random.nextFloat() * 0.5f + 0.5f // Alfa base entre 0.5 y 1.0
+                radius = Random.nextFloat() * 1.8f + 0.5f,
+                alpha = Random.nextFloat() * 0.7f + 0.2f // Alfa estático entre 0.2 y 0.9
             )
         }
     }
 
-    // 2. Se crean `Animatable` para controlar el alfa de cada estrella individualmente.
-    val animatables = remember { stars.map { Animatable(it.baseAlpha) } }
-
-    // 3. Se usa LaunchedEffect para la animación de parpadeo de las estrellas.
-    LaunchedEffect(Unit) {
-        animatables.forEachIndexed { index, animatable ->
-            if (index % 3 == 0) { // Solo un subconjunto parpadea
-                launch {
-                    delay(Random.nextLong(0, 1000))
-                    animatable.animateTo(
-                        targetValue = 0.2f,
-                        animationSpec = infiniteRepeatable(
-                            animation = tween(
-                                durationMillis = Random.nextInt(1500, 5000),
-                                easing = LinearEasing
-                            ),
-                            repeatMode = RepeatMode.Reverse
-                        )
-                    )
-                }
-            }
-        }
-    }
-
-    // --- Lógica de la Estrella Fugaz ---
+    // --- Lógica de la Estrella Fugaz (sin cambios) ---
     var shootingStar by remember { mutableStateOf<ShootingStarState?>(null) }
     val shootingStarProgress = remember { Animatable(0f) }
 
     LaunchedEffect(Unit) {
         while (true) {
-            delay(Random.nextLong(1000, 2000))
+            delay(Random.nextLong(1500, 4000))
             shootingStar = ShootingStarState(
                 startX = Random.nextFloat(),
                 startY = -0.1f,
-                angle = Random.nextDouble(120.0, 150.0).toFloat(),
+                angle = Random.nextDouble(110.0, 160.0).toFloat(),
                 speed = Random.nextFloat() * 0.8f + 0.5f,
                 tailLength = Random.nextFloat() * 200f + 150f
             )
@@ -672,7 +649,7 @@ fun StarryNightBackground(starCount: Int = 200) {
         }
     }
 
-    // 5. Se dibujan el fondo y todos los elementos celestes.
+    // 2. Se dibujan el fondo y todos los elementos celestes.
     Canvas(
         modifier = Modifier
             .fillMaxSize()
@@ -686,21 +663,13 @@ fun StarryNightBackground(starCount: Int = 200) {
                 )
             )
     ) {
-        // Dibuja las estrellas que parpadean.
-        stars.forEachIndexed { index, star ->
-            val animatedAlpha = animatables[index].value
-
-            // CORRECCIÓN: Se interpola el color basado en el brillo de la estrella.
-            // Cuando la estrella está más brillante (alfa más alto), tiende a amarillo.
-            val fraction = ((animatedAlpha - 0.2f) / (star.baseAlpha - 0.2f)).coerceIn(0f, 1f)
-            val yellowTint = Color(0xFFFFF5B2) // Un amarillo suave
-            val currentColor = lerp(Color.White, yellowTint, fraction)
-
+        // Dibuja las estrellas estáticas.
+        stars.forEach { star ->
             drawCircle(
-                color = currentColor, // Se usa el color animado.
+                color = Color.White,
                 center = Offset(star.x * size.width, star.y * size.height),
                 radius = star.radius,
-                alpha = animatedAlpha
+                alpha = star.alpha // Se usa el alfa estático de la estrella.
             )
         }
 

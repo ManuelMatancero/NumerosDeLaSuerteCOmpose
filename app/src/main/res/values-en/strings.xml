@@ -10,7 +10,7 @@
 
     <!--TABs-->
     <string name="tab_suerte">Lucky Today</string>
-    <string name="tab_chance">Chance</string>
+    <string name="tab_chance">Streak</string>
     <string name="tab_dreams">Dreams</string>
     <string name="tab_horoscope">Horoscope</string>
     <string name="dreams_shake_hint">Shake the phone and get a dream</string>
@@ -71,6 +71,39 @@
     <string name="tab_lucky_search">Find</string>
     <string name="find_fourtune">Find your fortune</string>
     <string name="find_fourtune_desc">Swipe your finger and reveal your numbers today</string>
+    <string name="drawer_hello">Hello, %1$s</string>
+    <string name="tab_lottery">Blessed</string>
+    <string name="drawer_header_greeting">Welcome</string>
+    <string name="Super">Super Lucky Star</string>
+    <string name="kino">Being Fortunate</string>
+    <string name="pool">Pool of Bless</string>
+    <string name="pega">Three Stars</string>
+    <string name="Pale">Triple Clover</string>
+    <string name="real">Four Leaf Clover</string>
+
+    <!-- Tab Titles -->
+    <string name="tab_help">Help</string>
+
+    <!-- Help Screen -->
+    <string name="help_center_title">Help Center</string>
+    <string name="help_desc_lucky_numbers">Your 3 personal lucky numbers, generated from your profile. Come back every day to discover the new ones!</string>
+    <string name="help_desc_chance">A combination of 5 numbers to give you an extra chance. They are renewed daily.</string>
+    <string name="help_desc_lottery_games">Simulated results for the most popular lottery drawings. Press the button to generate the numbers for the day.</string>
+    <string name="help_desc_horoscope">Connect the stars of your zodiac constellation to reveal your daily horoscope and astral numbers.</string>
+    <string name="help_desc_find_fortune">An interactive game. Slide your finger over the mysterious area to find your 3 hidden lucky numbers among icons.</string>
+    <string name="help_desc_dreams">Dreamt of something? Soon you will be able to find the meaning of your dreams and their associated numbers here.</string>
+
+    <string name="common_save">Save</string>
+    <string name="edit_profile_title">Profile Edit</string>
+    <string name="drawer_open_menu">Open menu</string>
+    <string name="drawer_edit_profile">profile edit</string>
+
+    <string name="oracle_title">The Time Oracle</string>
+    <string name="oracle_subtitle">Stop the cosmos at the perfect moment</string>
+    <string name="oracle_stop_button">Stop the Oracle</string>
+    <string name="oracle_come_back_tomorrow">Destiny has spoken. Come back tomorrow.</string>
+    <string name="tab_oracle">Oracle of Time</string>
+    <string name="help_desc_oracle">An astral clock spins endlessly. Tap it at the perfect moment to stop it and reveal the numbers that destiny has chosen for you!</string>
 
     <string-array name="zodiac_signs">
         <item>Aries</item>
