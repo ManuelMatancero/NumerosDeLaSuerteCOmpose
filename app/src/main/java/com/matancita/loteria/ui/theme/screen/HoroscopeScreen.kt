@@ -59,6 +59,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.matancita.loteria.R
+import com.matancita.loteria.anuncios.AdmobAdaptiveBanner
 import com.matancita.loteria.anuncios.AdvancedNativeAdView
 import com.matancita.loteria.anuncios.InterstitialAdManager
 import com.matancita.loteria.anuncios.TEST_INTERSTITIAL_AD_UNIT_ID
@@ -231,8 +232,7 @@ fun  HoroscopeScreen(
                             haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         }
                         horoscopeViewModel.onStarTapped(index, totalStars)
-                        if(index == 2){
-                            //Show add
+                        if (index == totalStars - 1) {
                             showInterstitialTrigger = true
                         }
                     }
@@ -331,6 +331,10 @@ fun  HoroscopeScreen(
                                 fontSize = 12.sp
                             )
                         }
+                        // DENTRO DEL Column PRINCIPAL, AL FINAL, DESPUÉS DEL BOX DEL HORÓSCOPO
+                        Spacer(modifier = Modifier.height(16.dp))
+                        AdmobAdaptiveBanner(adUnitId = "ca-app-pub-9861862421891852/2370788758") // Usa tu ID de banner
+                        Spacer(modifier = Modifier.height(16.dp))
                     }
                 }
             }

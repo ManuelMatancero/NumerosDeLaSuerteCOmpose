@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.matancita.loteria.R
+import com.matancita.loteria.anuncios.AdmobAdaptiveBanner
 import com.matancita.loteria.viewmodel.OracleGameState
 import com.matancita.loteria.viewmodel.OracleViewModel
 
@@ -115,6 +116,8 @@ private fun PortraitLayout(
                     viewModel.stopOracle()
                 }
             }
+
+            AdmobAdaptiveBanner(adUnitId="ca-app-pub-9861862421891852/2370788758")
         }
     }
 }

@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.matancita.loteria.R
+import com.matancita.loteria.anuncios.AdmobAdaptiveBanner
 import com.matancita.loteria.anuncios.AdvancedNativeAdView
 import com.matancita.loteria.ui.theme.DisabledButtonColor
 import com.matancita.loteria.ui.theme.GoldAccent
@@ -239,9 +240,10 @@ fun Screen2Numbers(
             Spacer(modifier = Modifier.weight(1f))
             Spacer(modifier = Modifier.height(24.dp))
             if(SHOW_AD){
-                AdvancedNativeAdView()
+                // --- CAMBIO AQUÍ ---
+                AdmobAdaptiveBanner(adUnitId = "ca-app-pub-9861862421891852/2370788758")
             }
-            Spacer(modifier = Modifier.height(16.dp))
+
         }
     }
 }

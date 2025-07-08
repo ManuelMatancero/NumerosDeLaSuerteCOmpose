@@ -12,8 +12,8 @@ android {
         applicationId = "com.matancita.loteria"
         minSdk = 24
         targetSdk = 35
-        versionCode = 26
-        versionName = "7.0"
+        versionCode = 28
+        versionName = "8.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -76,6 +76,7 @@ dependencies {
     implementation(libs.play.services.ads)
 
     implementation(libs.androidx.work.runtime.ktx)
+    implementation("androidx.cardview:cardview:1.0.0")
 
 
     // Retrofit para networking

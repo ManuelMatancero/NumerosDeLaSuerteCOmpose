@@ -1,5 +1,6 @@
 package com.matancita.loteria.ui.theme.screen
 
+import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -54,6 +55,7 @@ import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
@@ -67,6 +69,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.matancita.loteria.R
+import com.matancita.loteria.anuncios.InterstitialAdManager
 import java.util.Calendar
 import kotlin.random.Random
 import kotlinx.coroutines.CoroutineScope
@@ -107,6 +110,26 @@ fun FindYourLuckScreen() {
 
     val luckyNumbers = remember { getDailyLuckyNumbers(3) }
     val scope = rememberCoroutineScope() // Se obtiene el CoroutineScope aquí
+
+    // --- AÑADIR ESTO ---
+    val context = LocalContext.current
+    val activity = LocalActivity.current
+    var showInterstitialTrigger by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        // Asegúrate de usar tu ID de intersticial real aquí
+        InterstitialAdManager.loadAd(context, "ca-app-pub-9861862421891852/3574997556")
+    }
+    if (showInterstitialTrigger) {
+        LaunchedEffect(Unit) {
+            activity?.let {
+                InterstitialAdManager.showAd(it) {
+                    // Acción opcional cuando el anuncio se cierra
+                }
+            }
+            showInterstitialTrigger = false
+        }
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         StarryNightBackground()
@@ -167,6 +190,11 @@ fun FindYourLuckScreen() {
                         onUpdateTouchPosition = { newPosition ->
                             touchPosition = newPosition
                             checkForFoundNumbers(newPosition, hiddenCircles, foundNumbers) { foundNumber ->
+                                // --- CAMBIO CLAVE AQUÍ ---
+                                // Verifica si este es el último número a encontrar
+                                if (foundNumbers.size + 1 == luckyNumbers.size) {
+                                    showInterstitialTrigger = true
+                                }
                                 foundNumbers = foundNumbers + foundNumber
                             }
                         }

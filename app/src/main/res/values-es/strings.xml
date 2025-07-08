@@ -82,6 +82,7 @@
     <string name="pega">Pega Tres</string>
     <string name="Pale">Quiniela Pale</string>
     <string name="real">Loteria Real</string>
+    <string name="anuncio">Anuncio</string>
 
     <!-- Títulos de Pestañas -->
     <string name="tab_help">Ayuda</string>

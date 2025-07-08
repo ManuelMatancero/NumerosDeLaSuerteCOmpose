@@ -105,6 +105,7 @@
     <string name="oracle_come_back_tomorrow">El destino ha hablado. Vuelve mañana.</string>
     <string name="tab_oracle">Oráculo del Tiempo</string>
     <string name="help_desc_oracle">Un reloj astral gira sin cesar. ¡Tócalo en el momento justo para detenerlo y revelar los números que el destino ha elegido para ti!</string>
+    <string name="anuncio">Anuncio</string>
 
     <string-array name="zodiac_signs">
         <item>Aries</item>
