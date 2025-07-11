@@ -8,7 +8,7 @@ class MyApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         // Inicializa el SDK de Mobile Ads
-        MobileAds.initialize(this) {} // El {} es un listener opcional de finalización
+        MobileAds.initialize(this)
         // Programar la notificación diaria cuando la app se inicia por primera vez.
         NotificationScheduler.scheduleDailyReminder(this)
     }

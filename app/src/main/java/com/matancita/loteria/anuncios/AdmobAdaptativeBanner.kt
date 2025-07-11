@@ -11,8 +11,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -22,9 +24,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
+
 
 // ID de Unidad de Anuncio de Prueba para Banners Adaptables: ca-app-pub-3940256099942544/9214589741
 const val TEST_ADAPTIVE_BANNER_AD_UNIT_ID = "ca-app-pub-9861862421891852/2370788758"
@@ -36,38 +40,20 @@ fun AdmobAdaptiveBanner(
     adUnitId: String // Pasa tu ID de unidad real aquí
 ) {
     val context = LocalContext.current
-    val isInEditMode = LocalInspectionMode.current
 
     val adView = remember { AdView(context) }
 
     LaunchedEffect(adUnitId, adView) {
-        if (isInEditMode) return@LaunchedEffect
 
         try {
             val activity = context as Activity
-            val windowManager = activity.windowManager
-
-            val adWidth = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                val windowMetrics = windowManager.currentWindowMetrics
-                val insets = windowMetrics.windowInsets
-                    .getInsetsIgnoringVisibility(WindowInsets.Type.systemBars())
-                val bounds = windowMetrics.bounds
-                val adWidthPixels = bounds.width() - insets.left - insets.right
-                (adWidthPixels / context.resources.displayMetrics.density).toInt()
-            } else {
-                @Suppress("DEPRECATION")
-                val displayMetrics = DisplayMetrics()
-                @Suppress("DEPRECATION")
-                windowManager.defaultDisplay.getRealMetrics(displayMetrics)
-                (displayMetrics.widthPixels / displayMetrics.density).toInt()
-            }
 
             adView.adUnitId = adUnitId
             // Se establece el tamaño del anuncio ANTES de que se cargue
             adView.setAdSize(
-                AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(
+                AdSize.getCurrentOrientationInlineAdaptiveBannerAdSize(
                     context,
-                    adWidth
+                    320
                 )
             )
             // Se carga el anuncio
@@ -82,27 +68,31 @@ fun AdmobAdaptiveBanner(
     // El Box ahora envuelve la altura del AndroidView
     Box(
         modifier = modifier.fillMaxWidth(),
-        contentAlignment = Alignment.Center
     ) {
-        if (isInEditMode) {
-            // Placeholder para el Preview con una altura fija representativa
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp) // Altura típica de un banner para el preview
-                    .background(Color.Gray.copy(alpha = 0.5f))
-            ) {
-                Text(text = "Ad Banner Preview", modifier = Modifier.align(Alignment.Center))
-            }
-        } else {
-            // --- SOLUCIÓN ---
-            // El AndroidView solo debe llenar el ancho.
-            // Su altura será determinada por el AdView que contiene.
-            // El Box padre se adaptará a esa altura.
-            AndroidView(
-                factory = { adView },
-                modifier = Modifier.fillMaxWidth()
+            BannerAd(
+                adView,
+                Modifier.fillMaxWidth()
             )
-        }
+    }
+}
+
+@Composable
+fun BannerAd(adView: AdView, modifier: Modifier = Modifier) {
+    // Ad load does not work in preview mode because it requires a network connection.
+    if (LocalInspectionMode.current) {
+        Box { Text(text = "Google Mobile Ads preview banner.", modifier.align(Alignment.Center)) }
+        return
+    }
+
+    AndroidView(modifier = modifier.wrapContentSize(), factory = { adView })
+
+    // Pause and resume the AdView when the lifecycle is paused and resumed.
+    LifecycleResumeEffect(adView) {
+        adView.resume()
+        onPauseOrDispose { adView.pause() }
+    }
+    DisposableEffect(Unit) {
+        // Destroy the AdView to prevent memory leaks when the screen is disposed.
+        onDispose { adView.destroy() }
     }
 }
