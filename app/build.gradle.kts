@@ -12,8 +12,8 @@ android {
         applicationId = "com.matancita.loteria"
         minSdk = 24
         targetSdk = 35
-        versionCode = 29
-        versionName = "8.2"
+        versionCode = 30
+        versionName = "8.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

@@ -45,13 +45,13 @@ object InterstitialAdManager {
                     Log.d(TAG2, "Interstitial ad cargado exitosamente.")
                     mInterstitialAd = interstitialAd
                     isLoadingAd = false
-                    setFullScreenContentCallback()
+                    setFullScreenContentCallback(context)
                 }
             }
         )
     }
 
-    private fun setFullScreenContentCallback() {
+    private fun setFullScreenContentCallback(context: Context) {
         mInterstitialAd?.fullScreenContentCallback = object : FullScreenContentCallback() {
             override fun onAdClicked() {
                 Log.d(TAG2, "Interstitial ad fue clickeado.")
@@ -62,7 +62,7 @@ object InterstitialAdManager {
                 // Es importante establecer mInterstitialAd a null para que se pueda cargar uno nuevo.
                 mInterstitialAd = null
                 // Opcionalmente, puedes precargar el siguiente anuncio aquí si tu lógica lo requiere.
-                // loadAd(context, adUnitId) // Cuidado con el contexto aquí si lo haces
+                 loadAd(context, adUnitId) // Cuidado con el contexto aquí si lo haces
             }
 
             override fun onAdFailedToShowFullScreenContent(adError: AdError) {

@@ -16,6 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,9 +26,11 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.LifecycleResumeEffect
+import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
 import com.google.android.gms.ads.AdView
+import com.google.android.gms.ads.LoadAdError
 
 
 // ID de Unidad de Anuncio de Prueba para Banners Adaptables: ca-app-pub-3940256099942544/9214589741
@@ -43,25 +46,56 @@ fun AdmobAdaptiveBanner(
 
     val adView = remember { AdView(context) }
 
+    val isAdLoaded = remember { mutableStateOf(false) }
+
+//    LaunchedEffect(adUnitId, adView) {
+//        if (isAdLoaded.value) {
+//            Log.d(TAG, "Anuncio ya cargado, omitiendo recarga.")
+//            return@LaunchedEffect
+//        }
+//        try {
+//            adView.adUnitId = adUnitId
+//            // Se establece el tamaño del anuncio ANTES de que se cargue
+//            adView.setAdSize(
+//                AdSize.getCurrentOrientationInlineAdaptiveBannerAdSize(
+//                    context,
+//                    320
+//                )
+//            )
+//            // Se carga el anuncio
+//            val adRequest = AdRequest.Builder().build()
+//            adView.loadAd(adRequest)
+//
+//        } catch (e: Exception) {
+//            Log.e(TAG, "Error al cargar el banner adaptable", e)
+//        }
+//    }
+
     LaunchedEffect(adUnitId, adView) {
+        if (isAdLoaded.value) {
+            Log.d(TAG, "Anuncio ya cargado, omitiendo recarga.")
+            return@LaunchedEffect
+        }
 
         try {
-            val activity = context as Activity
-
             adView.adUnitId = adUnitId
-            // Se establece el tamaño del anuncio ANTES de que se cargue
             adView.setAdSize(
-                AdSize.getCurrentOrientationInlineAdaptiveBannerAdSize(
-                    context,
-                    320
-                )
+                AdSize.getCurrentOrientationInlineAdaptiveBannerAdSize(context, 320)
             )
-            // Se carga el anuncio
             val adRequest = AdRequest.Builder().build()
             adView.loadAd(adRequest)
-
+            adView.setAdListener(object : AdListener() {
+                override fun onAdLoaded() {
+                    isAdLoaded.value = true // Marcar como cargado
+                    Log.d(TAG, "Banner adaptable cargado.")
+                }
+                override fun onAdFailedToLoad(error: LoadAdError) {
+                    isAdLoaded.value = false // Permitir reintentos si falla
+                    Log.e(TAG, "Error al cargar el banner adaptable: ${error.message}")
+                }
+            })
         } catch (e: Exception) {
-            Log.e(TAG, "Error al cargar el banner adaptable", e)
+            Log.e(TAG, "Error al configurar el banner adaptable", e)
         }
     }
 
