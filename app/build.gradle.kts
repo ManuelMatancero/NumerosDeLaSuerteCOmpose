@@ -6,14 +6,14 @@ plugins {
 
 android {
     namespace = "com.matancita.loteria"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.matancita.loteria"
         minSdk = 24
-        targetSdk = 35
-        versionCode = 30
-        versionName = "8.3"
+        targetSdk = 36
+        versionCode = 31
+        versionName = "8.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -92,5 +92,5 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:33.1.1"))
 
     // Dependencia específica para ML Kit On-Device Translation
-    implementation("com.google.mlkit:translate:17.0.2")
+    implementation("com.google.mlkit:translate:17.0.3")
 }

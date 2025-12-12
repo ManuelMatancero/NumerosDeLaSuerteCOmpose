@@ -29,7 +29,6 @@ import androidx.compose.ui.unit.sp
 import com.matancita.loteria.ui.theme.GoldAccent
 import com.matancita.loteria.ui.theme.LightGreen
 import com.matancita.loteria.ui.theme.LuckyGreen
-import com.matancita.loteria.ui.theme.screen.darken
 
 @Composable
 fun ZodiacSelectionDialog(
@@ -86,4 +85,11 @@ fun ZodiacSelectionDialog(
         shape = RoundedCornerShape(20.dp),
         modifier = Modifier.border(1.dp, GoldAccent, RoundedCornerShape(20.dp))
     )
+}
+
+fun Color.darken(factor: Float): Color {
+    val r = (this.red * (1f - factor)).coerceIn(0f, 1f)
+    val g = (this.green * (1f - factor)).coerceIn(0f, 1f)
+    val b = (this.blue * (1f - factor)).coerceIn(0f, 1f)
+    return Color(r, g, b, this.alpha)
 }

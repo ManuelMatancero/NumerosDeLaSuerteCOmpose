@@ -11,6 +11,7 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -84,20 +85,20 @@ fun Screen1Numbers(
 
     val context = LocalContext.current
     val activity = LocalActivity.current
-    var showInterstitialTrigger by remember { mutableStateOf(false) }
+//    var showInterstitialTrigger by remember { mutableStateOf(false) }
 
-    LaunchedEffect(Unit) {
-        InterstitialAdManager.loadAd(context, TEST_INTERSTITIAL_AD_UNIT_ID)
-    }
+//    LaunchedEffect(Unit) {
+//        InterstitialAdManager.loadAd(context, TEST_INTERSTITIAL_AD_UNIT_ID)
+//    }
 
-    if (showInterstitialTrigger) {
-        LaunchedEffect(Unit) {
-            activity?.let {
-                InterstitialAdManager.showAd(it) { /* Ad closed callback */ }
-            }
-            showInterstitialTrigger = false
-        }
-    }
+//    if (showInterstitialTrigger) {
+//        LaunchedEffect(Unit) {
+//            activity?.let {
+//                InterstitialAdManager.showAd(it) { /* Ad closed callback */ }
+//            }
+//            showInterstitialTrigger = false
+//        }
+//    }
 
     LaunchedEffect(numbersDataState, canGenerate, isAnimating) {
         if (!isAnimating) {
@@ -136,7 +137,7 @@ fun Screen1Numbers(
 
                 for (i in 0 until displayedNumbers.size) {
                     val job = launch {
-                        displayedNumbers[i] = "..." // Indicador de "conjurando"
+                        displayedNumbers[i] = "..."
                         delay(REVEAL_DURATION_MS + (i * SETTLE_STAGGER_DELAY_MS))
                         if(i < actualNumbers.size) {
                             displayedNumbers[i] = actualNumbers[i].toString().padStart(2, '0')
@@ -153,8 +154,20 @@ fun Screen1Numbers(
         }
     }
 
-
-    Box(modifier = Modifier.fillMaxSize()) {
+    // --- CORRECCIÓN AQUÍ: Se añade el fondo oscuro ---
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                Brush.verticalGradient(
+                    listOf(
+                        Color(0xFF0D1117), // Azul noche muy oscuro
+                        Color(0xFF161B22)  // Un tono ligeramente más claro
+                    )
+                )
+            )
+    ) {
+        // Ahora las estrellas blancas SÍ se verán sobre el fondo oscuro
         StarryNightBackground()
 
         Column(
@@ -196,7 +209,7 @@ fun Screen1Numbers(
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
-            Divider(
+            HorizontalDivider(
                 color = GoldAccent.copy(alpha = 0.3f),
                 thickness = 1.dp,
                 modifier = Modifier.fillMaxWidth(0.6f).padding(bottom = 24.dp)
@@ -214,7 +227,7 @@ fun Screen1Numbers(
                 }
             }
 
-            Divider(
+            HorizontalDivider(
                 color = GoldAccent.copy(alpha = 0.3f),
                 thickness = 1.dp,
                 modifier = Modifier.fillMaxWidth(0.6f).padding(top = 24.dp)
@@ -226,7 +239,7 @@ fun Screen1Numbers(
             if (numbersGenerated) {
                 LaunchedEffect(Unit) {
                     delay(3000)
-                    showInterstitialTrigger = true
+//                    showInterstitialTrigger = true
                     numbersGenerated = false
                 }
             }
@@ -270,13 +283,23 @@ fun Screen1Numbers(
             Spacer(modifier = Modifier.weight(1f))
             Spacer(modifier = Modifier.height(24.dp))
             if(SHOW_AD){
-                // --- CAMBIO AQUÍ ---
                 AdmobAdaptiveBanner(adUnitId = "ca-app-pub-9861862421891852/2370788758")
             }
             Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
+
+// --- Asegúrate de tener estas definiciones al final del archivo si no las has importado ---
+
+
+
+data class StarParticle(
+    val x: Float,
+    val y: Float,
+    val radius: Float,
+    val phaseOffset: Float
+)
 
 @Composable
 fun StarlightOrb(
@@ -287,24 +310,33 @@ fun StarlightOrb(
     fontSize: TextUnit = 30.sp
 ) {
     val density = LocalDensity.current
-    val alpha by animateFloatAsState(targetValue = if (number == "?") 0.6f else 1f, label = "orbAlpha")
+
+    // Animación de opacidad general
+    val alpha by animateFloatAsState(
+        targetValue = if (number == "?") 0.6f else 1f,
+        label = "orbAlpha"
+    )
+
+    // Progreso del polvo estelar (stardust)
     val stardustProgress = remember { Animatable(0f) }
 
+    // Generar estrellas una sola vez
     val stars = remember {
-        List(12) { // 12 estrellas por ícono
+        List(12) {
             StarParticle(
-                x = (Random.nextFloat() - 0.5f) * 2f, // Rango de -1 a 1
-                y = (Random.nextFloat() - 0.5f) * 2f, // Rango de -1 a 1
-                radius = Random.nextFloat() * 1.6f + 0.8f, // Estrellas de varios tamaños
-                phaseOffset = Random.nextFloat() // Desfase aleatorio para el parpadeo
+                x = (Random.nextFloat() - 0.5f) * 2f,
+                y = (Random.nextFloat() - 0.5f) * 2f,
+                radius = Random.nextFloat() * 1.6f + 0.8f,
+                phaseOffset = Random.nextFloat()
             )
         }
     }
-    // Una transición infinita para que la animación se ejecute constantemente.
+
+    // Animación infinita para el parpadeo de las estrellas
     val infiniteTransition = rememberInfiniteTransition(label = "star_twinkle_transition")
     val animationProgress by infiniteTransition.animateFloat(
         initialValue = 0f,
-        targetValue = 1f, // Progreso de 0 a 1
+        targetValue = 1f,
         animationSpec = infiniteRepeatable(
             animation = tween(durationMillis = 4000, easing = LinearEasing),
             repeatMode = RepeatMode.Restart
@@ -312,11 +344,16 @@ fun StarlightOrb(
         label = "star_twinkle_progress"
     )
 
+    // Control de la animación del polvo estelar
     LaunchedEffect(isAnimating) {
-        if(isAnimating) {
-            stardustProgress.animateTo(1f, animationSpec = infiniteRepeatable(
-                tween(1000), RepeatMode.Restart
-            ))
+        if (isAnimating) {
+            stardustProgress.animateTo(
+                targetValue = 1f,
+                animationSpec = infiniteRepeatable(
+                    animation = tween(1000, easing = LinearEasing),
+                    repeatMode = RepeatMode.Restart
+                )
+            )
         } else {
             stardustProgress.snapTo(0f)
         }
@@ -326,7 +363,7 @@ fun StarlightOrb(
         contentAlignment = Alignment.Center,
         modifier = modifier
             .size(orbSize)
-            .alpha(alpha)
+            .alpha(alpha) // Modificador alpha de Compose UI
             .drawWithCache {
                 val orbBrush = Brush.radialGradient(
                     colors = listOf(
@@ -334,7 +371,7 @@ fun StarlightOrb(
                         Color(0xFF9C27B0).copy(alpha = 0.5f),
                         Color(0xFF4A148C).copy(alpha = 0.6f)
                     ),
-                    radius = with(density) { (orbSize / 2).toPx() } * 1.5f
+                    radius = size.minDimension / 2 * 1.5f
                 )
                 val borderBrush = Brush.linearGradient(
                     colors = listOf(
@@ -347,15 +384,28 @@ fun StarlightOrb(
                     drawCircle(brush = orbBrush)
                     drawCircle(brush = borderBrush, style = Stroke(width = 2.dp.toPx()))
 
-                    if(isAnimating) {
-                        val path = Path()
-                        val center = Offset(size.width / 2, size.height / 2)
+                    if (isAnimating) {
+                        // Dibujado del polvo estelar giratorio
+                        val center = center // center del DrawScope
                         val maxRadius = size.width / 2.5f
-                        val angle = stardustProgress.value * 360f * 3
-                        val radius = stardustProgress.value * maxRadius
-                        val x = center.x + cos(Math.toRadians(angle.toDouble())).toFloat() * radius
-                        val y = center.y + sin(Math.toRadians(angle.toDouble())).toFloat() * radius
-                        drawCircle(Color.White.copy(alpha = 1 - stardustProgress.value), radius = 3.dp.toPx(), center = Offset(x,y))
+                        val currentProgress = stardustProgress.value
+
+                        // Creamos 3 partículas de polvo orbitando
+                        for(i in 0..2) {
+                            val offsetAngle = i * 120f
+                            val angle = (currentProgress * 360f * 2) + offsetAngle // * 2 para más velocidad
+                            val radius = currentProgress * maxRadius
+
+                            val x = center.x + cos(Math.toRadians(angle.toDouble())).toFloat() * radius
+                            val y = center.y + sin(Math.toRadians(angle.toDouble())).toFloat() * radius
+
+                            val particleAlpha = (1 - currentProgress).coerceIn(0f, 1f)
+                            drawCircle(
+                                color = Color.White.copy(alpha = particleAlpha),
+                                radius = 2.dp.toPx(),
+                                center = Offset(x, y)
+                            )
+                        }
                     }
                 }
             }
@@ -368,25 +418,22 @@ fun StarlightOrb(
                 color = Color.White.copy(alpha = 0.9f),
                 fontFamily = FontFamily.SansSerif
             )
-            // Canvas para dibujar las estrellas animadas sobre el ícono
+
+            // Canvas para las estrellas internas
             Canvas(modifier = Modifier.matchParentSize()) {
                 val centerX = size.width / 2
                 val centerY = size.height / 2
 
                 stars.forEach { star ->
-                    // Calculamos el brillo (alfa) usando una onda sinusoidal.
-                    // El 'phaseOffset' y 'animationProgress' hacen que cada estrella parpadee
-                    // a su propio ritmo, creando un efecto de centelleo natural.
                     val wave = sin((animationProgress + star.phaseOffset) * 2 * Math.PI).toFloat()
-                    val alpha1 = (wave * 0.5f + 0.5f).coerceIn(0.1f, 1f) // Mapeamos de -1..1 a 0.1..1
+                    val starAlpha = (wave * 0.5f + 0.5f).coerceIn(0.1f, 1f)
 
-                    // Dibujamos cada estrella
                     drawCircle(
                         color = GoldAccent,
                         radius = star.radius,
-                        alpha = alpha1,
+                        alpha = starAlpha,
                         center = Offset(
-                            x = centerX + (star.x * centerX * 0.7f), // El 0.7f las mantiene más cerca del centro
+                            x = centerX + (star.x * centerX * 0.7f),
                             y = centerY + (star.y * centerY * 0.7f)
                         )
                     )

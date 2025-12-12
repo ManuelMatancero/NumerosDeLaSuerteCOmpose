@@ -122,7 +122,15 @@ fun SetupScreen(
         datePickerDialog.setOnDismissListener { openDialog.value = false }
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = Modifier.fillMaxSize()
+        .background(
+            Brush.verticalGradient(
+                listOf(
+                    Color(0xFF0D1117), // Azul noche muy oscuro
+                    Color(0xFF161B22)  // Un tono ligeramente más claro
+                )
+            )
+        )) {
         StarryNightBackground()
 
         Column(

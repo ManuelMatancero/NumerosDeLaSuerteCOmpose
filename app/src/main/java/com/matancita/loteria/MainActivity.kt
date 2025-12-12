@@ -75,14 +75,17 @@ fun AppEntryPoint() {
         }
     }
     // --- FIN DE LA LÓGICA DE PERMISOS ---
-
-    if (hasConnection) {
-        // Si hay conexión, procedemos con la lógica normal de la app.
+//This logic block the app when there is no internet
+//    if (hasConnection) {
+//        // Si hay conexión, procedemos con la lógica normal de la app.
+//        AppNavigation()
+//    } else {
+//        // Si no hay conexión, mostramos la pantalla de error.
+//        NoInternetScreen()
+//    }
+  //For now it works without internet
         AppNavigation()
-    } else {
-        // Si no hay conexión, mostramos la pantalla de error.
-        NoInternetScreen()
-    }
+
 }
 
 @Composable
