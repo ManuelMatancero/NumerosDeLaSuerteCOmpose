@@ -1,10 +1,17 @@
 package com.matancita.loteria.ui.theme.screen
 
 import android.app.DatePickerDialog
+import android.content.Intent
+import android.net.Uri
 import androidx.annotation.StringRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -24,6 +31,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -76,12 +84,14 @@ fun MainScreenLayout(
 ) {
     val drawerNavController = rememberNavController()
     val userProfile by userDataViewModel.userProfile.collectAsState()
+    val streak by userDataViewModel.streakData.collectAsState()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     var showEditSheet by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
+    val context = LocalContext.current
 
-    val navItems = listOf(
+    val bottomNavItems = listOf(
         NavItem.Screen1,
         NavItem.Screen2,
         NavItem.Screen6,
@@ -90,7 +100,6 @@ fun MainScreenLayout(
         NavItem.Screen5,
         NavItem.Screen3
     )
-    val helpItem = NavItem.Screen7
 
     LaunchedEffect(userProfile) {
         userProfile?.let {
@@ -123,18 +132,74 @@ fun MainScreenLayout(
             ) {
                 DrawerHeader(userProfile = userProfile)
                 Spacer(modifier = Modifier.height(8.dp))
-                Divider(color = Color.White.copy(alpha = 0.2f), thickness = 1.dp)
+                HorizontalDivider(color = Color.White.copy(alpha = 0.2f), thickness = 1.dp)
 
                 Column(modifier = Modifier.weight(1f)) {
                     Spacer(modifier = Modifier.height(8.dp))
-                    navItems.forEach { item ->
-                        DrawerItem(navController = drawerNavController, item = item, scope = scope, drawerState = drawerState)
-                    }
+
+                    // Help
+                    NavigationDrawerItem(
+                        icon = { Icon(Icons.AutoMirrored.Filled.HelpOutline, contentDescription = stringResource(R.string.tab_help)) },
+                        label = { Text(stringResource(R.string.tab_help)) },
+                        selected = false,
+                        onClick = {
+                            drawerNavController.navigate(NavItem.Screen7.route) {
+                                popUpTo(drawerNavController.graph.startDestinationId) { saveState = true }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                            scope.launch { drawerState.close() }
+                        },
+                        colors = NavigationDrawerItemDefaults.colors(
+                            unselectedContainerColor = Color.Transparent,
+                            unselectedIconColor = Color.White.copy(alpha = 0.7f),
+                            unselectedTextColor = Color.White.copy(alpha = 0.7f)
+                        ),
+                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                    )
+
+                    // My Profile
+                    NavigationDrawerItem(
+                        icon = { Icon(Icons.Default.Person, contentDescription = "My Profile") },
+                        label = { Text("My Profile") },
+                        selected = false,
+                        onClick = {
+                            scope.launch { drawerState.close() }
+                            showEditSheet = true
+                        },
+                        colors = NavigationDrawerItemDefaults.colors(
+                            unselectedContainerColor = Color.Transparent,
+                            unselectedIconColor = Color.White.copy(alpha = 0.7f),
+                            unselectedTextColor = Color.White.copy(alpha = 0.7f)
+                        ),
+                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                    )
+
+                    // Rate App
+                    NavigationDrawerItem(
+                        icon = { Icon(Icons.Default.Star, contentDescription = "Rate App") },
+                        label = { Text("Rate App") },
+                        selected = false,
+                        onClick = {
+                            scope.launch { drawerState.close() }
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=${context.packageName}"))
+                            try {
+                                context.startActivity(intent)
+                            } catch (_: Exception) {
+                                val webIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=${context.packageName}"))
+                                context.startActivity(webIntent)
+                            }
+                        },
+                        colors = NavigationDrawerItemDefaults.colors(
+                            unselectedContainerColor = Color.Transparent,
+                            unselectedIconColor = Color.White.copy(alpha = 0.7f),
+                            unselectedTextColor = Color.White.copy(alpha = 0.7f)
+                        ),
+                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                    )
                 }
 
-                Divider(color = Color.White.copy(alpha = 0.2f), thickness = 1.dp)
-                Spacer(modifier = Modifier.height(8.dp))
-                DrawerItem(navController = drawerNavController, item = helpItem, scope = scope, drawerState = drawerState)
+                HorizontalDivider(color = Color.White.copy(alpha = 0.2f), thickness = 1.dp)
                 Spacer(modifier = Modifier.height(8.dp))
             }
         }
@@ -143,8 +208,7 @@ fun MainScreenLayout(
             topBar = {
                 val navBackStackEntry by drawerNavController.currentBackStackEntryAsState()
                 val currentRoute = navBackStackEntry?.destination?.route
-                val allItems = navItems + helpItem
-                val currentScreen = allItems.find { it.route == currentRoute }
+                val currentScreen = bottomNavItems.find { it.route == currentRoute }
 
                 CenterAlignedTopAppBar(
                     title = {
@@ -159,8 +223,16 @@ fun MainScreenLayout(
                         }
                     },
                     actions = {
-                        IconButton(onClick = { showEditSheet = true }) {
-                            Icon(Icons.Default.Edit, contentDescription = stringResource(R.string.drawer_edit_profile))
+                        if (streak.current > 0) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = "\uD83D\uDD25 ${streak.current}",
+                                    color = Color(0xFFFFA000),
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 18.sp
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(12.dp))
                         }
                     },
                     colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
@@ -169,6 +241,23 @@ fun MainScreenLayout(
                         navigationIconContentColor = Color.White.copy(alpha = 0.9f),
                         actionIconContentColor = Color.White.copy(alpha = 0.9f)
                     )
+                )
+            },
+            bottomBar = {
+                val navBackStackEntry by drawerNavController.currentBackStackEntryAsState()
+                val currentRoute = navBackStackEntry?.destination?.route
+                ScrollableBottomNav(
+                    items = bottomNavItems,
+                    selectedRoute = currentRoute,
+                    onItemSelected = { item ->
+                        if (currentRoute != item.route) {
+                            drawerNavController.navigate(item.route) {
+                                popUpTo(drawerNavController.graph.startDestinationId) { saveState = true }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        }
+                    }
                 )
             },
             containerColor = Color.Transparent
@@ -404,6 +493,57 @@ fun MagicalAppNavigationHost(
         }
         composable(NavItem.Screen7.route) {
             HelpScreen()
+        }
+    }
+}
+
+@Composable
+fun ScrollableBottomNav(
+    items: List<NavItem>,
+    selectedRoute: String?,
+    onItemSelected: (NavItem) -> Unit
+) {
+    Surface(
+        color = Color(0xFF0c0c2b).copy(alpha = 0.98f),
+        tonalElevation = 6.dp,
+        modifier = Modifier.navigationBarsPadding()
+    ) {
+        LazyRow(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(72.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            items(items) { item ->
+                val isSelected = item.route == selectedRoute
+                val iconColor = if (isSelected) Color(0xFFFFA000) else Color.White.copy(alpha = 0.6f)
+                val textColor = if (isSelected) Color(0xFFFFA000) else Color.White.copy(alpha = 0.6f)
+
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
+                        .width(68.dp)
+                        .clickable { onItemSelected(item) }
+                        .padding(vertical = 6.dp)
+                ) {
+                    Icon(
+                        imageVector = item.icon,
+                        contentDescription = stringResource(id = item.titleResId),
+                        tint = iconColor,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = stringResource(id = item.titleResId),
+                        color = textColor,
+                        fontSize = 10.sp,
+                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
         }
     }
 }

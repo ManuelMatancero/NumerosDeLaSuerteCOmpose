@@ -29,6 +29,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.activity.compose.LocalActivity
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -85,23 +86,23 @@ fun HoroscopeScreen(
     var pendingSignKey by remember { mutableStateOf<String?>(null) }
 
     val haptic = LocalHapticFeedback.current
-//    val context = LocalContext.current
-//    val activity = LocalActivity.current
+    val context = LocalContext.current
+    val activity = LocalActivity.current
 
-//    var showInterstitialTrigger by remember { mutableStateOf(false) }
+    var showInterstitialTrigger by remember { mutableStateOf(false) }
 
-//    LaunchedEffect(Unit) {
-//        InterstitialAdManager.loadAd(context, TEST_INTERSTITIAL_AD_UNIT_ID)
-//    }
+    LaunchedEffect(Unit) {
+        InterstitialAdManager.loadAd(context, TEST_INTERSTITIAL_AD_UNIT_ID)
+    }
 
-//    if (showInterstitialTrigger) {
-//        LaunchedEffect(Unit) {
-//            activity?.let {
-//                InterstitialAdManager.showAd(it) { /* Callback opcional */ }
-//            }
-//            showInterstitialTrigger = false
-//        }
-//    }
+    if (showInterstitialTrigger) {
+        LaunchedEffect(Unit) {
+            activity?.let {
+                InterstitialAdManager.showAd(it) { /* Callback opcional */ }
+            }
+            showInterstitialTrigger = false
+        }
+    }
 
     LaunchedEffect(userProfile) {
         userProfile?.let { profile ->
@@ -168,13 +169,17 @@ fun HoroscopeScreen(
             val constellationPoints = currentSignInfo.constellationPoints
 
             Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Top,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp)
-                    .verticalScroll(rememberScrollState())
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Top,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(16.dp)
+                        .verticalScroll(rememberScrollState())
+                ) {
                 Text(
                     text = stringResource(R.string.horoscope_title),
                     fontSize = 32.sp,
@@ -208,10 +213,9 @@ fun HoroscopeScreen(
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         }
                         horoscopeViewModel.onStarTapped(index, totalStars)
-                        if (index == totalStars - 1) {
-                            //Avoid showing the intestitial
-//                            showInterstitialTrigger = true
-                        }
+                    if (index == totalStars - 1) {
+                        showInterstitialTrigger = true
+                    }
                     }
                 )
 
@@ -278,29 +282,24 @@ fun HoroscopeScreen(
                             )
                         }
 
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        if (uiState.data?.dailyHoroscope?.isNotBlank() == true) {
-                            if (uiState.isTranslating) {
+                        if (uiState.isTranslating) {
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Center
+                            ) {
                                 CircularProgressIndicator(
-                                    modifier = Modifier.size(24.dp),
-                                    color = Color.White,
+                                    modifier = Modifier.size(16.dp),
+                                    color = Color.White.copy(alpha = 0.7f),
                                     strokeWidth = 2.dp
                                 )
-                            } else {
-                                OutlinedButton(
-                                    onClick = { horoscopeViewModel.requestTranslation() },
-                                    border = BorderStroke(1.dp, Color.White.copy(alpha = 0.5f)),
-                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White)
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Translate,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(ButtonDefaults.IconSize)
-                                    )
-                                    Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                                    Text(text = if (uiState.translatedHoroscope == null) "Traducir" else "Ver Original")
-                                }
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = stringResource(R.string.horoscope_translating_hint),
+                                    color = Color.White.copy(alpha = 0.6f),
+                                    fontSize = 12.sp,
+                                    fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
+                                )
                             }
                         }
 
@@ -315,9 +314,9 @@ fun HoroscopeScreen(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                }
                 AdmobAdaptiveBanner(adUnitId = "ca-app-pub-9861862421891852/2370788758")
-                Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(16.dp))
             }
         }
     }

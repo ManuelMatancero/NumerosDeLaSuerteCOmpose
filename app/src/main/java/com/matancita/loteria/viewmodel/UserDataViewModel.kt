@@ -3,6 +3,7 @@ package com.matancita.loteria.viewmodel
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.matancita.loteria.repository.StreakData
 import com.matancita.loteria.repository.UserDataRepository
 import com.matancita.loteria.repository.UserProfile
 import kotlinx.coroutines.flow.SharingStarted
@@ -19,9 +20,18 @@ class UserDataViewModel(application: Application) : AndroidViewModel(application
     val isSetupComplete: StateFlow<Boolean?> = repository.isSetupCompleteFlow
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
+    val streakData: StateFlow<StreakData> = repository.streakFlow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), StreakData(0, 0))
+
     fun saveUserProfile(name: String, dob: Long) {
         viewModelScope.launch {
             repository.saveUserProfile(name, dob)
+        }
+    }
+
+    fun recordStreak() {
+        viewModelScope.launch {
+            repository.recordStreakCheck()
         }
     }
 

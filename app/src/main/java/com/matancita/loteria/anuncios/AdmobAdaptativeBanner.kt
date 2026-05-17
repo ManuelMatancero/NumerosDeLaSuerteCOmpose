@@ -18,6 +18,9 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -71,7 +74,10 @@ fun AdmobAdaptiveBanner(
 //        }
 //    }
 
-    LaunchedEffect(adUnitId, adView) {
+    val coroutineScope = rememberCoroutineScope()
+    val retryTrigger = remember { mutableStateOf(0) }
+
+    LaunchedEffect(adUnitId, adView, retryTrigger.value) {
         if (isAdLoaded.value) {
             Log.d(TAG, "Anuncio ya cargado, omitiendo recarga.")
             return@LaunchedEffect
@@ -79,19 +85,25 @@ fun AdmobAdaptiveBanner(
 
         try {
             adView.adUnitId = adUnitId
+            val displayMetrics = context.resources.displayMetrics
+            val widthInDp = (displayMetrics.widthPixels / displayMetrics.density).toInt()
             adView.setAdSize(
-                AdSize.getCurrentOrientationInlineAdaptiveBannerAdSize(context, 320)
+                AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(context, widthInDp)
             )
             val adRequest = AdRequest.Builder().build()
             adView.loadAd(adRequest)
             adView.setAdListener(object : AdListener() {
                 override fun onAdLoaded() {
-                    isAdLoaded.value = true // Marcar como cargado
+                    isAdLoaded.value = true
                     Log.d(TAG, "Banner adaptable cargado.")
                 }
                 override fun onAdFailedToLoad(error: LoadAdError) {
-                    isAdLoaded.value = false // Permitir reintentos si falla
+                    isAdLoaded.value = false
                     Log.e(TAG, "Error al cargar el banner adaptable: ${error.message}")
+                    coroutineScope.launch {
+                        delay(8000)
+                        retryTrigger.value += 1
+                    }
                 }
             })
         } catch (e: Exception) {

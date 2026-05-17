@@ -9,6 +9,11 @@ import com.google.android.gms.ads.FullScreenContentCallback
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 
 
@@ -20,6 +25,8 @@ object InterstitialAdManager {
     private var mInterstitialAd: InterstitialAd? = null
     private var isLoadingAd: Boolean = false
     private var adUnitId: String = TEST_INTERSTITIAL_AD_UNIT_ID // Default, puede ser sobreescrito
+    private var pendingDismissCallback: (() -> Unit)? = null
+    private val managerScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
     fun loadAd(context: Context, adUnit: String = TEST_INTERSTITIAL_AD_UNIT_ID) {
         if (isLoadingAd || mInterstitialAd != null) {
@@ -39,6 +46,10 @@ object InterstitialAdManager {
                     Log.e(TAG2, "Interstitial ad falló al cargar: ${adError.message}")
                     mInterstitialAd = null
                     isLoadingAd = false
+                    managerScope.launch {
+                        delay(10000)
+                        loadAd(context, adUnitId)
+                    }
                 }
 
                 override fun onAdLoaded(interstitialAd: InterstitialAd) {
@@ -59,15 +70,18 @@ object InterstitialAdManager {
 
             override fun onAdDismissedFullScreenContent() {
                 Log.d(TAG2, "Interstitial ad fue descartado (dismissed).")
-                // Es importante establecer mInterstitialAd a null para que se pueda cargar uno nuevo.
                 mInterstitialAd = null
-                // Opcionalmente, puedes precargar el siguiente anuncio aquí si tu lógica lo requiere.
-                 loadAd(context, adUnitId) // Cuidado con el contexto aquí si lo haces
+                pendingDismissCallback?.invoke()
+                pendingDismissCallback = null
+                loadAd(context, adUnitId)
             }
 
             override fun onAdFailedToShowFullScreenContent(adError: AdError) {
                 Log.e(TAG2, "Interstitial ad falló al mostrarse: ${adError.message}")
                 mInterstitialAd = null
+                pendingDismissCallback?.invoke()
+                pendingDismissCallback = null
+                loadAd(context, adUnitId)
             }
 
             override fun onAdImpression() {
@@ -83,14 +97,13 @@ object InterstitialAdManager {
     }
 
     fun showAd(activity: Activity, onAdDismissed: () -> Unit = {}) {
-        if (mInterstitialAd != null) {
-            mInterstitialAd?.show(activity)
-            // El callback onAdDismissed se maneja ahora a través de FullScreenContentCallback
+        val ad = mInterstitialAd
+        if (ad != null) {
+            pendingDismissCallback = onAdDismissed
+            ad.show(activity)
         } else {
             Log.d(TAG2,"Interstitial ad no estaba listo para mostrarse.")
-            // Opcionalmente, intenta cargarlo de nuevo para la próxima vez.
-            // loadAd(activity.applicationContext, adUnitId)
-            onAdDismissed() // Llama al callback si el anuncio no se muestra
+            onAdDismissed()
         }
     }
 

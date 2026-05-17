@@ -1,5 +1,6 @@
 package com.matancita.loteria.ui.theme.screen
 
+import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -29,6 +30,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
@@ -42,6 +44,7 @@ import androidx.compose.ui.unit.sp
 import com.matancita.loteria.R
 import com.matancita.loteria.anuncios.AdmobAdaptiveBanner
 import com.matancita.loteria.anuncios.AdvancedNativeAdView
+import com.matancita.loteria.anuncios.InterstitialAdManager
 import com.matancita.loteria.ui.theme.DisabledButtonColor
 import com.matancita.loteria.ui.theme.GoldAccent
 import com.matancita.loteria.viewmodel.NumbersViewModel
@@ -80,6 +83,12 @@ fun Screen2Numbers(
     var isAnimating by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
     val haptic = LocalHapticFeedback.current
+    val activity = LocalActivity.current
+    val context = LocalContext.current
+
+    LaunchedEffect(Unit) {
+        InterstitialAdManager.loadAd(context)
+    }
 
     LaunchedEffect(numbersDataState, canGenerate, isAnimating) {
         if (!isAnimating) {
@@ -131,6 +140,12 @@ fun Screen2Numbers(
                 animationJobs.joinAll()
                 vibrationJob.cancelAndJoin()
                 isAnimating = false
+
+                if (SHOW_AD) {
+                    activity?.let {
+                        InterstitialAdManager.showAd(it)
+                    }
+                }
             }
         }
     }
@@ -149,14 +164,17 @@ fun Screen2Numbers(
         StarryNightBackground()
 
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp, vertical = 24.dp)
-                .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Top
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.weight(0.5f))
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 16.dp, vertical = 24.dp)
+                    .verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Spacer(modifier = Modifier.height(32.dp))
 
             val profile = userProfile
             val baseTitle = stringResource(R.string.magic_numbers_title_user)
@@ -248,13 +266,12 @@ fun Screen2Numbers(
                     fontWeight = FontWeight.Bold
                 )
             }
-            Spacer(modifier = Modifier.weight(1f))
-            Spacer(modifier = Modifier.height(24.dp))
+            }
             if(SHOW_AD){
                 // --- CAMBIO AQUÍ ---
                 AdmobAdaptiveBanner(adUnitId = "ca-app-pub-9861862421891852/2370788758")
             }
-
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }

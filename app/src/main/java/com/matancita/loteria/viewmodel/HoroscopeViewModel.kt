@@ -23,6 +23,11 @@ import java.util.Date
 import java.util.Locale
 import kotlin.random.Random
 
+private sealed class ApiResult {
+    data class Success(val text: String) : ApiResult()
+    data class Error(val message: String) : ApiResult()
+}
+
 data class HoroscopeUiState(
     val data: HoroscopeData? = null,
     val isLoading: Boolean = true,
@@ -46,34 +51,23 @@ class HoroscopeViewModel(application: Application) : AndroidViewModel(applicatio
 
             if (savedData != null && isToday(savedData.timestamp)) {
                 _uiState.update { it.copy(data = savedData, isLoading = false) }
+                autoTranslateIfNeeded(savedData.dailyHoroscope)
             } else {
                 generateAndSaveNewHoroscope(userProfile)
             }
         }
     }
 
-    // --- NUEVA FUNCIÓN PARA INICIAR LA TRADUCCIÓN ---
-    fun requestTranslation() {
-        val originalText = _uiState.value.data?.dailyHoroscope ?: return
-
-        // No traducir si ya está traducido o si el texto está vacío
-        if (_uiState.value.translatedHoroscope != null || originalText.isBlank()) {
-            // Si el usuario quiere volver al original, reseteamos la traducción
-            _uiState.update { it.copy(translatedHoroscope = null) }
-            return
-        }
-
-        // Obtener el idioma del dispositivo (ej: "es" para español)
+    // --- Traducción automática según idioma del dispositivo ---
+    private fun autoTranslateIfNeeded(text: String) {
         val targetLanguage = Locale.getDefault().language
-
-        // No tiene sentido traducir de inglés a inglés
-        if (targetLanguage == TranslateLanguage.ENGLISH) {
-            _uiState.update { it.copy(translationError = "Device is already in English.") }
-            return
-        }
+        // No traducir si el dispositivo ya está en inglés
+        if (targetLanguage == TranslateLanguage.ENGLISH || targetLanguage == "en") return
+        // No traducir si ya existe traducción o el texto está vacío
+        if (_uiState.value.translatedHoroscope != null || text.isBlank()) return
 
         viewModelScope.launch {
-            translateText(originalText, targetLanguage)
+            translateText(text, targetLanguage)
         }
     }
 
@@ -139,35 +133,50 @@ class HoroscopeViewModel(application: Application) : AndroidViewModel(applicatio
         val numbers = List(4) { random.nextInt(1, 101) }.sorted()
 
         // --- INICIO DE CAMBIOS: Lógica mejorada que usa el mensaje de error de la API ---
-        val horoscopeText = try {
+        val apiResult = try {
             Log.d("HoroscopeViewModel", "Llamando a la API para $sign")
             val response = ApiClient.apiService.getDailyHoroscope(sign = sign)
             Log.d("HoroscopeViewModel", "API devolvió: $response")
 
-            if (response.success && response.data?.horoscope_data != null) {
-                // Caso exitoso: todo está bien
-                response.data.horoscope_data!!
+            val horoscopeText = response.data?.horoscope ?: response.data?.horoscope_data
+            if (horoscopeText != null) {
+                ApiResult.Success(horoscopeText)
             } else {
-                // Caso de error: usamos el mensaje de la API si existe, si no, uno genérico.
                 val errorMessage = response.message ?: "La predicción para hoy no está disponible."
                 Log.w("HoroscopeViewModel", "API no devolvió un horóscopo válido para $sign. Mensaje: $errorMessage")
-                errorMessage // Devolvemos el mensaje de error (de la API o el nuestro)
+                ApiResult.Error(errorMessage)
             }
         } catch (e: Exception) {
             Log.e("HoroscopeViewModel", "Fallo al llamar o parsear la API para $sign", e)
-            "No se pudo conectar con el servicio. Revisa tu conexión a internet."
+            ApiResult.Error("No se pudo conectar con el servicio. Revisa tu conexión a internet.")
         }
         // --- FIN DE CAMBIOS ---
 
-        val newData = HoroscopeData(
-            timestamp = System.currentTimeMillis(),
-            luckyNumbers = numbers,
-            dailyHoroscope = horoscopeText, // <-- Usa el texto obtenido de la API
-            tappedStars = emptySet(),
-            numbersRevealed = false
-        )
-        repository.saveHoroscopeData(newData)
-        _uiState.update { it.copy(data = newData, isLoading = false) }
+        when (apiResult) {
+            is ApiResult.Success -> {
+                val newData = HoroscopeData(
+                    timestamp = System.currentTimeMillis(),
+                    luckyNumbers = numbers,
+                    dailyHoroscope = apiResult.text,
+                    tappedStars = emptySet(),
+                    numbersRevealed = false
+                )
+                repository.saveHoroscopeData(newData)
+                _uiState.update { it.copy(data = newData, isLoading = false, translationError = null) }
+                autoTranslateIfNeeded(apiResult.text)
+            }
+            is ApiResult.Error -> {
+                // NO guardamos el error en DataStore para que la próxima vez se reintente la API
+                val fallbackData = HoroscopeData(
+                    timestamp = System.currentTimeMillis(),
+                    luckyNumbers = numbers,
+                    dailyHoroscope = apiResult.message,
+                    tappedStars = emptySet(),
+                    numbersRevealed = false
+                )
+                _uiState.update { it.copy(data = fallbackData, isLoading = false, translationError = null) }
+            }
+        }
     }
 
     // ... (El resto del archivo: onStarTapped, isToday no cambian) ...

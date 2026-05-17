@@ -8,8 +8,10 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -17,7 +19,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.rounded.AutoAwesome
+import android.util.Log
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -27,12 +32,14 @@ import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -45,7 +52,7 @@ import com.matancita.loteria.R
 import com.matancita.loteria.anuncios.AdmobAdaptiveBanner
 import com.matancita.loteria.anuncios.AdvancedNativeAdView
 import com.matancita.loteria.anuncios.InterstitialAdManager
-import com.matancita.loteria.anuncios.TEST_INTERSTITIAL_AD_UNIT_ID
+import com.matancita.loteria.anuncios.RewardedAdManager
 import com.matancita.loteria.ui.theme.DisabledButtonColor
 import com.matancita.loteria.ui.theme.GoldAccent
 import com.matancita.loteria.viewmodel.NumbersViewModel
@@ -83,9 +90,16 @@ fun Screen1Numbers(
     val coroutineScope = rememberCoroutineScope()
     val haptic = LocalHapticFeedback.current
 
+    val vipNumbers by numbersViewModel.vipNumbers.collectAsState()
+    var isVipDecrypting by remember { mutableStateOf(false) }
+    var lastRevealedVip by remember { mutableStateOf<Int?>(null) }
+
     val context = LocalContext.current
     val activity = LocalActivity.current
-//    var showInterstitialTrigger by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        RewardedAdManager.loadAd(context)
+    }
 
 //    LaunchedEffect(Unit) {
 //        InterstitialAdManager.loadAd(context, TEST_INTERSTITIAL_AD_UNIT_ID)
@@ -259,7 +273,8 @@ fun Screen1Numbers(
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFF4A148C).copy(alpha = 0.6f),
                     contentColor = Color.White,
-                    disabledContainerColor = DisabledButtonColor.copy(alpha = 0.3f)
+                    disabledContainerColor = Color(0xFF2D2D2D).copy(alpha = 0.8f),
+                    disabledContentColor = Color.White.copy(alpha = 0.6f)
                 ),
                 border = BorderStroke(1.dp, Color.White.copy(alpha = 0.5f)),
                 elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp, pressedElevation = 4.dp)
@@ -280,6 +295,60 @@ fun Screen1Numbers(
                     fontWeight = FontWeight.Bold
                 )
             }
+
+            // --- VIP Section ---
+            if (!canGenerate && !isAnimating) {
+                Spacer(modifier = Modifier.height(24.dp))
+
+                val isRewardedReady by RewardedAdManager.isAdLoadedFlow.collectAsState()
+
+                if (isVipDecrypting) {
+                    VipDecryptingView()
+                } else {
+                    VipVaultCard(
+                        hasVips = vipNumbers.isNotEmpty(),
+                        isAdReady = isRewardedReady,
+                        onUnlock = {
+                            if (!isRewardedReady) return@VipVaultCard
+                            activity?.let {
+                                RewardedAdManager.showAd(
+                                    it,
+                                    onReward = { _ ->
+                                        userProfile?.let { profile ->
+                                            val newNumber = numbersViewModel.generateVipNumber(profile)
+                                            if (newNumber != -1) {
+                                                isVipDecrypting = true
+                                                coroutineScope.launch {
+                                                    delay(2500)
+                                                    numbersViewModel.commitVipNumber(newNumber)
+                                                    lastRevealedVip = newNumber
+                                                    isVipDecrypting = false
+                                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                    delay(5000)
+                                                    lastRevealedVip = null
+                                                }
+                                            }
+                                        }
+                                    },
+                                    onDismiss = {
+                                        Log.d("Screen1Numbers", "Rewarded ad dismissed without reward.")
+                                    }
+                                )
+                            }
+                        }
+                    )
+                }
+
+                if (vipNumbers.isNotEmpty() && !isVipDecrypting) {
+                    Spacer(modifier = Modifier.height(24.dp))
+                    VipCollectionView(
+                        numbers = vipNumbers,
+                        userName = userProfile?.name?.takeIf { it.isNotBlank() } ?: "",
+                        lastRevealed = lastRevealedVip
+                    )
+                }
+            }
+
             Spacer(modifier = Modifier.weight(1f))
             Spacer(modifier = Modifier.height(24.dp))
             if(SHOW_AD){
@@ -444,3 +513,315 @@ fun StarlightOrb(
 }
 
 
+
+@Composable
+private fun VipVaultCard(
+    hasVips: Boolean,
+    isAdReady: Boolean,
+    onUnlock: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(0.9f),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF1A1025)),
+        border = BorderStroke(
+            1.5.dp,
+            Brush.horizontalGradient(
+                listOf(
+                    GoldAccent.copy(alpha = 0.3f),
+                    GoldAccent.copy(alpha = 0.8f),
+                    GoldAccent.copy(alpha = 0.3f)
+                )
+            )
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(56.dp)
+                    .background(
+                        brush = Brush.radialGradient(
+                            listOf(GoldAccent.copy(alpha = 0.25f), Color.Transparent)
+                        ),
+                        shape = RoundedCornerShape(50)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = if (hasVips) Icons.Rounded.AutoAwesome else Icons.Filled.Lock,
+                    contentDescription = null,
+                    tint = GoldAccent,
+                    modifier = Modifier.size(28.dp)
+                )
+            }
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = if (hasVips) stringResource(R.string.vip_vault_title_has_vips) else stringResource(R.string.vip_vault_title_no_vips),
+                color = GoldAccent,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = if (hasVips)
+                    stringResource(R.string.vip_vault_desc_has_vips)
+                else
+                    stringResource(R.string.vip_vault_desc_no_vips),
+                color = Color.White.copy(alpha = 0.75f),
+                fontSize = 14.sp,
+                textAlign = TextAlign.Center,
+                lineHeight = 20.sp
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(
+                onClick = onUnlock,
+                enabled = isAdReady,
+                shape = RoundedCornerShape(50),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFFFA000),
+                    contentColor = Color.Black,
+                    disabledContainerColor = Color(0xFFFFA000).copy(alpha = 0.3f)
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp),
+                elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp)
+            ) {
+                Icon(
+                    imageVector = if (hasVips) Icons.Rounded.AutoAwesome else Icons.Filled.PlayArrow,
+                    contentDescription = null,
+                    tint = Color.Black.copy(alpha = if (isAdReady) 1f else 0.5f)
+                )
+                Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+                Text(
+                    text = when {
+                        !isAdReady -> stringResource(R.string.vip_button_loading)
+                        hasVips -> stringResource(R.string.vip_button_claim_another)
+                        else -> stringResource(R.string.vip_button_unlock)
+                    },
+                    fontWeight = FontWeight.ExtraBold,
+                    color = Color.Black.copy(alpha = if (isAdReady) 1f else 0.5f)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun VipDecryptingView() {
+    val infiniteTransition = rememberInfiniteTransition(label = "decrypt_pulse")
+    val pulse by infiniteTransition.animateFloat(
+        initialValue = 0.85f,
+        targetValue = 1.15f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(700, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "pulse"
+    )
+    val rotate by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1800, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "rotate"
+    )
+
+    Card(
+        modifier = Modifier.fillMaxWidth(0.9f),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF1A1025)),
+        border = BorderStroke(1.dp, GoldAccent.copy(alpha = 0.5f))
+    ) {
+        Column(
+            modifier = Modifier.padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = stringResource(R.string.vip_decrypting_title),
+                color = GoldAccent,
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.sp
+            )
+            Spacer(modifier = Modifier.height(20.dp))
+            Box(
+                modifier = Modifier.size(110.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Canvas(modifier = Modifier.fillMaxSize()) {
+                    val stroke = Stroke(width = 3.dp.toPx())
+                    drawArc(
+                        color = GoldAccent.copy(alpha = 0.7f),
+                        startAngle = rotate,
+                        sweepAngle = 100f,
+                        useCenter = false,
+                        style = stroke
+                    )
+                    drawArc(
+                        color = GoldAccent.copy(alpha = 0.3f),
+                        startAngle = rotate + 180f,
+                        sweepAngle = 60f,
+                        useCenter = false,
+                        style = stroke
+                    )
+                }
+                Box(
+                    modifier = Modifier
+                        .size(80.dp * pulse)
+                        .background(
+                            brush = Brush.radialGradient(
+                                listOf(GoldAccent.copy(alpha = 0.3f), Color.Transparent)
+                            ),
+                            shape = RoundedCornerShape(50)
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "??",
+                        fontSize = 32.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = GoldAccent
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            LinearProgressIndicator(
+                color = GoldAccent,
+                trackColor = Color.White.copy(alpha = 0.1f),
+                modifier = Modifier.fillMaxWidth(0.7f)
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = stringResource(R.string.vip_decrypting_subtitle),
+                color = Color.White.copy(alpha = 0.5f),
+                fontSize = 12.sp
+            )
+        }
+    }
+}
+
+@Composable
+private fun VipCollectionView(
+    numbers: List<Int>,
+    userName: String,
+    lastRevealed: Int?
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Text(
+            text = stringResource(R.string.vip_collection_title),
+            color = GoldAccent,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold,
+            letterSpacing = 1.sp
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.fillMaxWidth(0.9f)
+        ) {
+            numbers.forEach { num ->
+                val isNew = num == lastRevealed
+                VipNumberChip(number = num, isNew = isNew, userName = userName)
+            }
+        }
+    }
+}
+
+@Composable
+private fun VipNumberChip(
+    number: Int,
+    isNew: Boolean,
+    userName: String
+) {
+    val scale by animateFloatAsState(
+        targetValue = if (isNew) 1.15f else 1f,
+        animationSpec = spring(dampingRatio = 0.5f, stiffness = 200f),
+        label = "vipScale"
+    )
+    val (rarityRes, rarityColor) = getVipRarity(number)
+    val rarityName = stringResource(rarityRes)
+    val fortunes = stringArrayResource(R.array.vip_fortunes).toList()
+    val fortune = remember(number, userName) { getVipFortune(number, userName, fortunes) }
+
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .size(if (isNew) 100.dp else 70.dp)
+                .graphicsLayer { scaleX = scale; scaleY = scale }
+                .background(
+                    brush = Brush.radialGradient(
+                        listOf(
+                            rarityColor.copy(alpha = 0.25f),
+                            rarityColor.copy(alpha = 0.1f),
+                            Color.Transparent
+                        )
+                    ),
+                    shape = RoundedCornerShape(50)
+                )
+                .border(
+                    width = if (isNew) 2.5.dp else 1.5.dp,
+                    brush = Brush.linearGradient(listOf(rarityColor, GoldAccent)),
+                    shape = RoundedCornerShape(50)
+                )
+        ) {
+            Text(
+                text = number.toString().padStart(2, '0'),
+                fontSize = if (isNew) 28.sp else 20.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = if (isNew) Color.White else Color.White.copy(alpha = 0.9f)
+            )
+        }
+        Spacer(modifier = Modifier.height(6.dp))
+        Surface(
+            color = rarityColor.copy(alpha = 0.15f),
+            shape = RoundedCornerShape(8.dp),
+            border = BorderStroke(0.5.dp, rarityColor.copy(alpha = 0.5f))
+        ) {
+            Text(
+                text = rarityName.uppercase(),
+                color = rarityColor,
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                letterSpacing = 0.5.sp
+            )
+        }
+        if (isNew) {
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = "\"$fortune\"",
+                color = Color.White.copy(alpha = 0.7f),
+                fontSize = 12.sp,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth(0.85f),
+                lineHeight = 16.sp
+            )
+        }
+    }
+}
+
+private fun getVipRarity(number: Int): Pair<Int, Color> {
+    return when {
+        number == 100 -> R.string.vip_rarity_cosmic_legend to Color(0xFFFFD700)
+        number >= 76 -> R.string.vip_rarity_solar_flare to Color(0xFFFFA500)
+        number >= 51 -> R.string.vip_rarity_moonbeam to Color(0xFF9C27B0)
+        number >= 26 -> R.string.vip_rarity_starlight to Color(0xFF03A9F4)
+        else -> R.string.vip_rarity_nebula_core to Color(0xFF4CAF50)
+    }
+}
+
+private fun getVipFortune(number: Int, userName: String, fortunes: List<String>): String {
+    val personalization = userName.length.coerceAtLeast(1)
+    val index = (number * 7 + personalization * 3) % fortunes.size
+    return fortunes[index]
+}

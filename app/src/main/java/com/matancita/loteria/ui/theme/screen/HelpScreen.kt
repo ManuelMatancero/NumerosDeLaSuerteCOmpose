@@ -1,7 +1,9 @@
 package com.matancita.loteria.ui.theme.screen
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -44,7 +46,15 @@ fun HelpScreen() {
         HelpSection(Icons.Default.Bed, R.string.tab_dreams, R.string.help_desc_dreams)
     )
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                Brush.verticalGradient(
+                    listOf(Color(0xFF0D1117), Color(0xFF161B22))
+                )
+            )
+    ) {
         StarryNightBackground() // Reutiliza el fondo mágico
 
         Column(

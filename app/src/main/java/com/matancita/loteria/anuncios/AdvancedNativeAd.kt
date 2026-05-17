@@ -42,7 +42,7 @@ sealed class NativeAdState {
 @Composable
 fun AdvancedNativeAdView(
     modifier: Modifier = Modifier,
-    adUnitId: String = "ca-app-pub-9861862421891852/5150067478" // ID de prueba
+    adUnitId: String = "ca-app-pub-9861862421891852/5150067478"
 ) {
     var nativeAdState by remember { mutableStateOf<NativeAdState>(NativeAdState.Empty) }
     val context = LocalContext.current

@@ -50,6 +50,7 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.constraintlayout)
+    implementation(libs.androidx.compose.animation.core)
 //    implementation(libs.ads.mobile.sdk)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
@@ -81,11 +82,13 @@ dependencies {
     implementation("com.google.android.gms:play-services-ads:24.4.0")
 
 
-    // Retrofit para networking
+    // Retrofit + OkHttp para networking
     implementation ("com.squareup.retrofit2:retrofit:2.9.0")
     implementation ("com.squareup.retrofit2:converter-moshi:2.9.0")
+    implementation ("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation ("com.squareup.okhttp3:logging-interceptor:4.12.0")
 
-    // Moshi para p(arsear JSON
+    // Moshi para parsear JSON
     implementation ("com.squareup.moshi:moshi-kotlin:1.15.0")
 
     // BoM de Firebase (Bill of Materials) para manejar versiones

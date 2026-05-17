@@ -37,6 +37,9 @@ class NumbersViewModel(application: Application) : AndroidViewModel(application)
     private val _canGenerateScreen2 = MutableStateFlow(true)
     val canGenerateScreen2: StateFlow<Boolean> = _canGenerateScreen2.asStateFlow()
 
+    // VIP Numbers
+    private val _vipNumbers = MutableStateFlow<List<Int>>(emptyList())
+    val vipNumbers: StateFlow<List<Int>> = _vipNumbers.asStateFlow()
 
     fun loadNumbersForScreen(screenId: String, userProfile: UserProfile?) {
         viewModelScope.launch {
@@ -46,6 +49,15 @@ class NumbersViewModel(application: Application) : AndroidViewModel(application)
             if (screenId == "screen1") {
                 _screen1NumbersData.value = if (canGenerate) null else data // Clear if can generate new
                 _canGenerateScreen1.value = canGenerate
+                if (canGenerate) {
+                    _vipNumbers.value = emptyList()
+                    repository.clearDailyNumbersData("vip")
+                } else {
+                    // Restore VIP numbers from today if available
+                    val vipData = repository.getDailyNumbersData("vip").firstOrNull()
+                    val vipCanGenerate = checkIfCanGenerate(vipData?.timestamp)
+                    _vipNumbers.value = if (vipCanGenerate) emptyList() else vipData?.numbers ?: emptyList()
+                }
             } else if (screenId == "screen2") {
                 _screen2NumbersData.value = if (canGenerate) null else data
                 _canGenerateScreen2.value = canGenerate
@@ -106,6 +118,27 @@ class NumbersViewModel(application: Application) : AndroidViewModel(application)
                 _screen2NumbersData.value = DailyNumbersData(generatedNumbers, currentTime)
                 _canGenerateScreen2.value = false
             }
+        }
+    }
+
+    fun generateVipNumber(userProfile: UserProfile?): Int {
+        if (userProfile == null) return -1
+        val seed = "${userProfile.name}-${userProfile.dob}-vip-${System.currentTimeMillis()}".hashCode().toLong()
+        return Random(seed).nextInt(1, 101)
+    }
+
+    fun commitVipNumber(number: Int) {
+        val updated = _vipNumbers.value + number
+        _vipNumbers.value = updated
+        viewModelScope.launch {
+            repository.saveDailyNumbersData("vip", updated, System.currentTimeMillis())
+        }
+    }
+
+    fun clearVipNumbers() {
+        _vipNumbers.value = emptyList()
+        viewModelScope.launch {
+            repository.clearDailyNumbersData("vip")
         }
     }
 }

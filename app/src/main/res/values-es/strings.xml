@@ -68,6 +68,7 @@
     <string name="horoscope_confirm_change_title">Confirmar Cambio</string>
     <string name="horoscope_confirm_change_message">Podrás ver los nuevos números para %1$s a partir de mañana.</string>
     <string name="horoscope_select_sign_title">Elige tu Signo Zodiacal</string>
+    <string name="horoscope_translating_hint">Traduciendo…</string>
     <string name="common_continue">Continuar</string>
     <string name="common_cancel">Cancelar</string>
     <string name="tab_lucky_search">Encuentra</string>
@@ -107,6 +108,18 @@
     <string name="oracle_come_back_tomorrow">El destino ha hablado. Vuelve mañana.</string>
     <string name="tab_oracle">Oráculo del Tiempo</string>
     <string name="help_desc_oracle">Un reloj astral gira sin cesar. ¡Tócalo en el momento justo para detenerlo y revelar los números que el destino ha elegido para ti!</string>
+
+    <!-- Oracle Screen -->
+    <string name="oracle_header_subtitle">EL CRONOMETRISTA</string>
+    <string name="oracle_destiny_revealed">DESTINO REVELADO</string>
+    <string name="oracle_tap_core_instruction">TOCA EL NÚCLEO PARA DETENER EL TIEMPO</string>
+    <string name="oracle_sync_perfect">Sincronía Perfecta</string>
+    <string name="oracle_sync_great">Gran Sincronía</string>
+    <string name="oracle_sync_good">Buena Sincronía</string>
+    <string name="oracle_sync_missed">Sincronía Fallida</string>
+    <string name="oracle_chrono_resonance">Resonancia Crónica</string>
+    <string name="oracle_accuracy_label">Precisión</string>
+    <string name="oracle_fortune_title">Lectura Cósmica</string>
 
     <string-array name="zodiac_signs">
         <item>Aries</item>
@@ -345,6 +358,34 @@
         <item>Relaciones familiares, unión o aspectos del yo reflejados en otros.</item>
     </string-array>
 
+    <!-- Cadenas del Anuncio Recompensado VIP -->
+    <string name="vip_vault_title_has_vips">Bóveda VIP Cósmica</string>
+    <string name="vip_vault_title_no_vips">Desbloquea tu Número VIP</string>
+    <string name="vip_vault_desc_has_vips">El cosmos tiene más secretos para ti. Reclama otro número exclusivo.</string>
+    <string name="vip_vault_desc_no_vips">Mira un breve mensaje para desbloquear un número VIP único calculado a partir de tu perfil y la alineación estelar actual.</string>
+    <string name="vip_button_loading">Cargando oferta…</string>
+    <string name="vip_button_claim_another">Reclamar otro VIP</string>
+    <string name="vip_button_unlock">Desbloquear Número VIP</string>
+    <string name="vip_decrypting_title">Descifrando firma cósmica…</string>
+    <string name="vip_decrypting_subtitle">Alineando con tu carta estelar…</string>
+    <string name="vip_collection_title">Tu Colección VIP</string>
+    <string name="vip_rarity_cosmic_legend">Leyenda Cósmica</string>
+    <string name="vip_rarity_solar_flare">Llama Solar</string>
+    <string name="vip_rarity_moonbeam">Rayo Lunar</string>
+    <string name="vip_rarity_starlight">Luz de Estrella</string>
+    <string name="vip_rarity_nebula_core">Núcleo de Nebulosa</string>
 
+    <string-array name="vip_fortunes">
+        <item>Una fortuna inesperada te sonríe.</item>
+        <item>Una oportunidad oculta se revelará hoy.</item>
+        <item>Confía en tu intuición en asuntos de azar.</item>
+        <item>Las estrellas se alinean para una grata sorpresa.</item>
+        <item>Un pequeño riesgo puede traer una gran recompensa.</item>
+        <item>Tu energía atrae resultados positivos.</item>
+        <item>Busca la señal en el punto de inflexión.</item>
+        <item>La suerte favorece a los audaces—actúa con confianza.</item>
+        <item>Un encuentro amistoso trae buenas noticias.</item>
+        <item>El cosmos susurra: hoy es tu día.</item>
+    </string-array>
 
 </resources>
